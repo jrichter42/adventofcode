@@ -84,7 +84,7 @@
       <OptimizeReferences>false</OptimizeReferences>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /s /y $(ProjectDir)input\ $(ProjectDir)binary\$(ProjectName)\$(Platform)_$(Configuration)\input\</Command>
+      <Command>robocopy $(ProjectDir)input $(ProjectDir)binary\$(ProjectName)\$(Platform)_$(Configuration)\input /MIR</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -112,7 +112,7 @@
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /s /y $(ProjectDir)input\ $(ProjectDir)binary\$(ProjectName)\$(Platform)_$(Configuration)\input\</Command>
+      <Command>robocopy $(ProjectDir)input $(ProjectDir)binary\$(ProjectName)\$(Platform)_$(Configuration)\input /MIR</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

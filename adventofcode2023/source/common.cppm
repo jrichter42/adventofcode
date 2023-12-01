@@ -4,7 +4,10 @@ module;
 #include <Windows.h>
 #pragma warning(pop)
 
+#include <cassert>
+
 export module common;
+
 
 export import <string>;
 export using std::string;
@@ -15,10 +18,36 @@ export using std::format;
 export import <fstream>;
 export using std::ifstream;
 
+export import <algorithm>;
+export import <numeric>;
+
+export import <vector>;
+export import <array>;
+
 import <iostream>;
 
 export namespace aoc
 {
+	template<typename TCondition>
+	auto constexpr Assert(TCondition&& condition)
+	{
+		if (std::forward<TCondition>(condition) == false)
+		{
+			__debugbreak();
+		}
+		//return assert(std::forward<TCondition>(condition));
+	}
+
+	template<typename TCondition>
+	auto constexpr Assert(TCondition&& condition, auto message)
+	{
+		if (std::forward<TCondition>(condition) == false)
+		{
+			__debugbreak();
+		}
+		//return assert(std::forward<TCondition>(condition));
+	}
+
 	void Log(const string& message)
 	{
 		std::cout << message << std::endl;

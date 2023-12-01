@@ -21,6 +21,7 @@ export using std::ifstream;
 export import <algorithm>;
 export import <numeric>;
 
+export import <iterator>;
 export import <vector>;
 export import <array>;
 

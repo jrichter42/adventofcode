@@ -1,7 +1,7 @@
 module;
 
 #pragma warning(push, 0)
-//#include <Windows.h>
+#include <Windows.h>
 #pragma warning(pop)
 
 export module common;
@@ -22,7 +22,8 @@ export namespace aoc
 	void Log(const string& message)
 	{
 		std::cout << message << std::endl;
-		//OutputDebugString(result.c_str());
+		OutputDebugStringA(message.c_str());
+		OutputDebugStringA("\n");
 	}
 
 	template<typename... Args>

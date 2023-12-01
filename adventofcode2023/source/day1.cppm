@@ -4,7 +4,7 @@ import common;
 
 export namespace aoc
 {
-	/*export string ExecuteDay()
+	export string ExecutePart1()
 	{
 		auto input = OpenInput("day1.txt");
 
@@ -36,9 +36,9 @@ export namespace aoc
 		}
 
 		return std::to_string(result);
-	}*/
+	}
 
-	export string ExecuteDay()
+	export string ExecutePart2()
 	{
 		auto input = OpenInput("day1.txt");
 

@@ -9,6 +9,9 @@ export module common;
 export import <string>;
 export using std::string;
 
+export import <format>;
+export using std::format;
+
 export import <fstream>;
 export using std::ifstream;
 
@@ -20,6 +23,14 @@ export namespace aoc
 	{
 		std::cout << message << std::endl;
 		//OutputDebugString(result.c_str());
+	}
+
+	template<typename... Args>
+	void LogFormat(std::format_string<Args...> messageFormat, Args&&... args)
+	{
+		using FormatStringT = std::format_string<Args...>;
+		string formattedMessage = format(std::forward<FormatStringT>(messageFormat), std::forward<Args>(args)...);
+		Log(formattedMessage);
 	}
 
 	[[nodiscard]] ifstream Open(const string& filepath)

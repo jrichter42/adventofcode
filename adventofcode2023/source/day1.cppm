@@ -6,7 +6,7 @@ export namespace aoc
 {
 	export string ExecuteDay()
 	{
-		ifstream filestream = Open("input/day1.txt");
-		return Read<string>(filestream);
+		auto input = OpenInput("day1.txt");
+		return Read<string>(input);
 	}
 }

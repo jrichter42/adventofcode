@@ -35,6 +35,11 @@ export namespace aoc
 
 	}
 
+	[[nodiscard]] ifstream OpenInput(const string& filepathRelativeToInput)
+	{
+		return Open(string("input/") + filepathRelativeToInput);
+	}
+
 	template<typename DataT>
 	bool Read(ifstream& filestream, DataT& data)
 	{

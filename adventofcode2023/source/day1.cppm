@@ -4,7 +4,7 @@ import common;
 
 export namespace aoc
 {
-	export string ExecutePart1()
+	export String ExecutePart1()
 	{
 		auto input = OpenInput("day1.txt");
 
@@ -14,7 +14,7 @@ export namespace aoc
 		int result = 0;
 		while (input && input.eof() == false)
 		{
-			string line = Read<string>(input);
+			String line = Read<String>(input);
 
 			if (line.empty())
 			{
@@ -27,7 +27,7 @@ export namespace aoc
 			Assert(firstDigitIt != line.end());
 			Assert(lastDigitIt != line.rend());
 
-			string valueStr;
+			String valueStr;
 			valueStr.push_back(*firstDigitIt);
 			valueStr.push_back(*lastDigitIt);
 
@@ -38,19 +38,19 @@ export namespace aoc
 		return std::to_string(result);
 	}
 
-	export string ExecutePart2()
+	export String ExecutePart2()
 	{
 		auto input = OpenInput("day1.txt");
 
 		std::array<char, 10> numberChars;
 		std::iota(numberChars.begin(), numberChars.end(), '0');
 
-		std::array<string, 10> numberStrings{ "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" };
+		std::array<String, 10> numberStrings{ "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" };
 
 		int result = 0;
 		while (input && input.eof() == false)
 		{
-			string line = Read<string>(input);
+			String line = Read<String>(input);
 
 			if (line.empty())
 			{
@@ -65,16 +65,16 @@ export namespace aoc
 
 			size_t foundFirst = numberStrings.size();
 			size_t foundLast = numberStrings.size();
-			size_t foundFirstIdx = string::npos;
-			size_t foundLastIdx = string::npos;
+			size_t foundFirstIdx = String::npos;
+			size_t foundLastIdx = String::npos;
 			for (size_t i = 0; i < numberStrings.size(); i++)
 			{
-				string numberStr = numberStrings[i];
+				String numberStr = numberStrings[i];
 
 				size_t idx = line.find(numberStr);
 
-				if (idx != string::npos &&
-					(foundFirstIdx == string::npos || idx < foundFirstIdx))
+				if (idx != String::npos &&
+					(foundFirstIdx == String::npos || idx < foundFirstIdx))
 				{
 					foundFirstIdx = idx;
 					foundFirst = i;
@@ -82,17 +82,17 @@ export namespace aoc
 
 				idx = line.rfind(numberStr);
 
-				if (idx != string::npos &&
-					(foundLastIdx == string::npos || idx > foundLastIdx))
+				if (idx != String::npos &&
+					(foundLastIdx == String::npos || idx > foundLastIdx))
 				{
 					foundLastIdx = idx;
 					foundLast = i;
 				}
 			}
 
-			string valueStr;
+			String valueStr;
 
-			if (foundFirstIdx != string::npos && static_cast<int>(foundFirstIdx) < std::distance<string::const_iterator>(line.begin(), firstDigitIt))
+			if (foundFirstIdx != String::npos && static_cast<int>(foundFirstIdx) < std::distance<String::const_iterator>(line.begin(), firstDigitIt))
 			{
 				valueStr.push_back((char)(int('0') + foundFirst));
 			}
@@ -101,7 +101,7 @@ export namespace aoc
 				valueStr.push_back(*firstDigitIt);
 			}
 
-			if (foundLastIdx != string::npos && static_cast<int>(foundLastIdx) > std::distance<string::const_reverse_iterator>(lastDigitIt, --(line.rend())))
+			if (foundLastIdx != String::npos && static_cast<int>(foundLastIdx) > std::distance<String::const_reverse_iterator>(lastDigitIt, --(line.rend())))
 			{
 				valueStr.push_back(char(int('0') + foundLast));
 			}

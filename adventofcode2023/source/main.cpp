@@ -12,13 +12,13 @@ int main(int argc, char* argv[])
 	Log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 
 	const auto startPart1 = high_resolution_clock::now();
-	string resultPart1 = ExecutePart1();
+	String resultPart1 = ExecutePart1();
 	const auto endPart1 = high_resolution_clock::now();
 
 	Log("------------------------------");
 
 	const auto startPart2 = high_resolution_clock::now();
-	string resultPart2 = ExecutePart2();
+	String resultPart2 = ExecutePart2();
 	const auto endPart2 = high_resolution_clock::now();
 
 	Log("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");

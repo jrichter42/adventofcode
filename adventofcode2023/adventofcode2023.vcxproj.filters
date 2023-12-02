@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="source\day1.cppm" />
+    <ClCompile Include="source\day2.cppm" />
+    <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\common\common.cppm">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="source\common\stringutils.cppm">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="source\common\types.cppm">
+      <Filter>common</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="common">
+      <UniqueIdentifier>{31b2f139-34f8-4d6a-a3b9-22952dce2049}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

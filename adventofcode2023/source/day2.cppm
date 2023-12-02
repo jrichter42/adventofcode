@@ -52,15 +52,15 @@ export namespace aoc
 							u32 count = ToUnsigned(stoi(nrColorPair[0]));
 
 							const String& color = nrColorPair[1];
-							if (strcmp(color.c_str(), "red") == 0)
+							if (color == "red")
 							{
 								drawnCubes.Red = std::max(drawnCubes.Red, count);
 							}
-							else if (strcmp(color.c_str(), "green") == 0)
+							else if (color == "green")
 							{
 								drawnCubes.Green = std::max(drawnCubes.Green, count);
 							}
-							else if (strcmp(color.c_str(), "blue") == 0)
+							else if (color == "blue")
 							{
 								drawnCubes.Blue = std::max(drawnCubes.Blue, count);
 							}
@@ -106,15 +106,15 @@ export namespace aoc
 					u32 count = ToUnsigned(stoi(nrColorPair[0]));
 
 					const String& color = nrColorPair[1];
-					if (strcmp(color.c_str(), "red") == 0)
+					if (color == "red")
 					{
 						drawnCubes.Red = std::max(drawnCubes.Red, count);
 					}
-					else if (strcmp(color.c_str(), "green") == 0)
+					else if (color == "green")
 					{
 						drawnCubes.Green = std::max(drawnCubes.Green, count);
 					}
-					else if (strcmp(color.c_str(), "blue") == 0)
+					else if (color == "blue")
 					{
 						drawnCubes.Blue = std::max(drawnCubes.Blue, count);
 					}

@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClCompile Include="source\common.cppm" />
     <ClCompile Include="source\day1.cppm" />
+    <ClCompile Include="source\day2.cppm" />
     <ClCompile Include="source\main.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

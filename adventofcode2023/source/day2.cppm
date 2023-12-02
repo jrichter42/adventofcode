@@ -23,6 +23,45 @@ export namespace aoc
 		}
 	};
 
+	CubeSet CalculateCubesNeededForGame(const String& drawsStr)
+	{
+		CubeSet result;
+
+		Vector<String> draws = Split(drawsStr, "; ");
+		std::for_each(draws.begin(), draws.end(),
+			[&](const String& draw)
+			{
+				Vector<String> drawColorCounts = Split(draw, ", ");
+				std::for_each(drawColorCounts.begin(), drawColorCounts.end(),
+					[&](const String& drawColorCount)
+					{
+						Vector<String> nrColorPair = Split(drawColorCount, " ");
+
+						u32 count = ToUnsigned(stoi(nrColorPair[0]));
+
+						const String& color = nrColorPair[1];
+						if (color == "red")
+						{
+							result.Red = std::max(result.Red, count);
+						}
+						else if (color == "green")
+						{
+							result.Green = std::max(result.Green, count);
+						}
+						else if (color == "blue")
+						{
+							result.Blue = std::max(result.Blue, count);
+						}
+						else
+						{
+							Assert(false);
+						}
+					});
+			});
+
+		return result;
+	}
+
 	export String ExecutePart1()
 	{
 		const CubeSet bag = { .Red = 12, .Green = 13, .Blue = 14 };
@@ -33,43 +72,12 @@ export namespace aoc
 
 		for (String line; std::getline(input, line);)
 		{
-			CubeSet drawnCubes;
 			Vector<String> game = Split(line, ": ");
 
 			String gameIDStr = game[0].substr(strlen("Game "));
 			u32 gameID = ToUnsigned(stoi(gameIDStr));
 
-			Vector<String> draws = Split(game[1], "; ");
-			std::for_each(draws.begin(), draws.end(),
-				[&](const String& draw)
-				{
-					Vector<String> drawColorCounts = Split(draw, ", ");
-					std::for_each(drawColorCounts.begin(), drawColorCounts.end(),
-						[&](const String& drawColorCount)
-						{
-							Vector<String> nrColorPair = Split(drawColorCount, " ");
-
-							u32 count = ToUnsigned(stoi(nrColorPair[0]));
-
-							const String& color = nrColorPair[1];
-							if (color == "red")
-							{
-								drawnCubes.Red = std::max(drawnCubes.Red, count);
-							}
-							else if (color == "green")
-							{
-								drawnCubes.Green = std::max(drawnCubes.Green, count);
-							}
-							else if (color == "blue")
-							{
-								drawnCubes.Blue = std::max(drawnCubes.Blue, count);
-							}
-							else
-							{
-								Assert(false);
-							}
-						});
-				});
+			CubeSet drawnCubes = CalculateCubesNeededForGame(game[1]);
 
 			if (bag.Validate(drawnCubes))
 			{
@@ -90,40 +98,9 @@ export namespace aoc
 
 		for (String line; std::getline(input, line);)
 		{
-			CubeSet drawnCubes;
 			Vector<String> game = Split(line, ": ");
 
-			Vector<String> draws = Split(game[1], "; ");
-			std::for_each(draws.begin(), draws.end(),
-				[&](const String& draw)
-			{
-				Vector<String> drawColorCounts = Split(draw, ", ");
-				std::for_each(drawColorCounts.begin(), drawColorCounts.end(),
-					[&](const String& drawColorCount)
-				{
-					Vector<String> nrColorPair = Split(drawColorCount, " ");
-
-					u32 count = ToUnsigned(stoi(nrColorPair[0]));
-
-					const String& color = nrColorPair[1];
-					if (color == "red")
-					{
-						drawnCubes.Red = std::max(drawnCubes.Red, count);
-					}
-					else if (color == "green")
-					{
-						drawnCubes.Green = std::max(drawnCubes.Green, count);
-					}
-					else if (color == "blue")
-					{
-						drawnCubes.Blue = std::max(drawnCubes.Blue, count);
-					}
-					else
-					{
-						Assert(false);
-					}
-				});
-			});
+			CubeSet drawnCubes = CalculateCubesNeededForGame(game[1]);
 
 			u32 gamePowerSum = drawnCubes.Red * drawnCubes.Green * drawnCubes.Blue;
 			powerSum += gamePowerSum;

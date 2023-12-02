@@ -23,8 +23,6 @@ export namespace aoc
 		}
 	};
 
-
-
 	export String ExecutePart1()
 	{
 		const CubeSet bag = { .Red = 12, .Green = 13, .Blue = 14 };

@@ -11,7 +11,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\common\assertion.cppm" />
     <ClCompile Include="source\common\common.cppm" />
+    <ClCompile Include="source\common\fileutils.cppm" />
+    <ClCompile Include="source\common\logging.cppm" />
     <ClCompile Include="source\common\stringutils.cppm" />
     <ClCompile Include="source\common\types.cppm" />
     <ClCompile Include="source\day1.cppm" />

@@ -13,6 +13,15 @@
     <ClCompile Include="source\common\types.cppm">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="source\common\fileutils.cppm">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="source\common\logging.cppm">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="source\common\assertion.cppm">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="common">

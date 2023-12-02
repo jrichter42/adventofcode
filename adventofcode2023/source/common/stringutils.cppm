@@ -1,15 +1,21 @@
 export module stringutils;
 
 export import <cstring>;
-export import <string>;
+export import <format>;
 
 import types;
 
 export namespace aoc
 {
-	vector<String> Split(const String& string, const String& delimiterStr)
+	template<typename... Args>
+	[[nodiscard]] String StringFormat(const std::format_string<Args...> formatString, Args&&... args)
 	{
-		vector<String> result;
+		return std::format(formatString, std::forward<Args>(args)...);
+	}
+
+	Vector<String> Split(const String& string, const String& delimiterStr)
+	{
+		Vector<String> result;
 
 		size_t searchPos = 0;
 		while (searchPos < string.size())
@@ -30,7 +36,7 @@ export namespace aoc
 		return result;
 	}
 
-	vector<String> Split(const String& string, const char delimiterChar)
+	Vector<String> Split(const String& string, const char delimiterChar)
 	{
 		return Split(string, String(1, delimiterChar));
 	}

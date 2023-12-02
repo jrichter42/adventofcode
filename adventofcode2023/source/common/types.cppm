@@ -1,22 +1,26 @@
 export module types;
 
-export import <fstream>;
-
 export import <numeric>;
 export import <iterator>;
 export import <vector>;
 export import <array>;
 
+export import <fstream>;
+
+export import <string>;
 import <cstdint>;
 
 export namespace aoc
 {
-	export using String = std::string;
+	using String = std::string;
 
-	export using std::format;
-	export using std::ifstream;
-	export using std::vector;
-	export using std::array;
+	template<typename T>
+	using Vector = std::vector<T>;
+
+	template<typename T, size_t Size>
+	using Array = std::array<T, Size>;
+
+	using std::ifstream;
 
 	//Numeric types
 	//--------------------------------------------------

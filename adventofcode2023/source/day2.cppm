@@ -37,9 +37,7 @@ export namespace aoc
 			Vector<String> game = Split(line, ": ");
 
 			String gameIDStr = game[0].substr(strlen("Game "));
-			s32 gameIDSigned = stoi(gameIDStr);
-			Assert(gameIDSigned >= 0);
-			u32 gameID = static_cast<u32>(gameIDSigned);
+			u32 gameID = ToUnsigned(stoi(gameIDStr));
 
 			Vector<String> draws = Split(game[1], "; ");
 			std::for_each(draws.begin(), draws.end(),
@@ -51,9 +49,7 @@ export namespace aoc
 						{
 							Vector<String> nrColorPair = Split(drawColorCount, " ");
 
-							s32 countSigned = stoi(nrColorPair[0]);
-							Assert(countSigned >= 0);
-							u32 count = static_cast<u32>(countSigned);
+							u32 count = ToUnsigned(stoi(nrColorPair[0]));
 
 							const String& color = nrColorPair[1];
 							if (strcmp(color.c_str(), "red") == 0)
@@ -97,10 +93,6 @@ export namespace aoc
 			CubeSet drawnCubes;
 			Vector<String> game = Split(line, ": ");
 
-			String gameIDStr = game[0].substr(strlen("Game "));
-			s32 gameIDSigned = stoi(gameIDStr);
-			Assert(gameIDSigned >= 0);
-
 			Vector<String> draws = Split(game[1], "; ");
 			std::for_each(draws.begin(), draws.end(),
 				[&](const String& draw)
@@ -111,9 +103,7 @@ export namespace aoc
 				{
 					Vector<String> nrColorPair = Split(drawColorCount, " ");
 
-					s32 countSigned = stoi(nrColorPair[0]);
-					Assert(countSigned >= 0);
-					u32 count = static_cast<u32>(countSigned);
+					u32 count = ToUnsigned(stoi(nrColorPair[0]));
 
 					const String& color = nrColorPair[1];
 					if (strcmp(color.c_str(), "red") == 0)

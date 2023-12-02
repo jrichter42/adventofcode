@@ -1,11 +1,16 @@
 export module types;
 
-export import <numeric>;
 export import <iterator>;
 export import <vector>;
 export import <array>;
 
 export import <string>;
+
+export import <numeric>;
+export import <limits>;
+
+import assertion;
+
 import <cstdint>;
 
 export namespace aoc
@@ -62,4 +67,20 @@ export namespace aoc
 	constexpr const f32 f32_MIN = FLT_MIN;
 	constexpr const f64 f64_MAX = DBL_MAX;
 	constexpr const f64 f64_MIN = DBL_MIN;
+
+	//Numeric conversion
+	//--------------------------------------------------
+	template<typename SignedT, typename UnsignedT>
+	UnsignedT SignedToUnsignedImpl(const SignedT& value)
+	{
+		static_assert(std::numeric_limits<SignedT>::is_signed == true);
+		static_assert(std::numeric_limits<UnsignedT>::is_signed == false);
+		Assert(value >= 0, "Cannot convert negative value to unsigned");
+		return static_cast<UnsignedT>(value);
+	}
+
+	u8 ToUnsigned(s8 value) { return SignedToUnsignedImpl<s8, u8>(value); }
+	u16 ToUnsigned(s16 value) { return SignedToUnsignedImpl<s16, u16>(value); }
+	u32 ToUnsigned(s32 value) { return SignedToUnsignedImpl<s32, u32>(value); }
+	u64 ToUnsigned(s64 value) { return SignedToUnsignedImpl<s64, u64>(value); }
 }

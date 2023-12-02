@@ -22,6 +22,7 @@
     <ClCompile Include="source\common\assertion.cppm">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="source\day3.cppm" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="common">

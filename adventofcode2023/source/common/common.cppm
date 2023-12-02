@@ -11,7 +11,6 @@ export module common;
 export import types;
 export import stringutils;
 
-export import <format>;
 export import <algorithm>;
 
 import <iostream>;

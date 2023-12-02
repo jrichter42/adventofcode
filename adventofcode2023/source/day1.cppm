@@ -8,7 +8,7 @@ export namespace aoc
 	{
 		auto input = OpenInput("day1.txt");
 
-		std::array<char, 10> numberChars;
+		Array<char, 10> numberChars;
 		std::iota(numberChars.begin(), numberChars.end(), '0');
 
 		int result = 0;
@@ -42,10 +42,10 @@ export namespace aoc
 	{
 		auto input = OpenInput("day1.txt");
 
-		std::array<char, 10> numberChars;
+		Array<char, 10> numberChars;
 		std::iota(numberChars.begin(), numberChars.end(), '0');
 
-		std::array<String, 10> numberStrings{ "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" };
+		Array<String, 10> numberStrings{ "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" };
 
 		int result = 0;
 		while (input && input.eof() == false)

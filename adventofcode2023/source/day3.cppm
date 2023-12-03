@@ -8,7 +8,8 @@ export namespace aoc
 	{
 		Invalid,
 		Empty,
-		Symbol,
+		Symbol_PotentialGear,
+		Symbol_Other,
 		Number
 	};
 
@@ -22,7 +23,7 @@ export namespace aoc
 
 		u32 Width() const { return LocationEndExclusive - LocationBeginInclusive; }
 
-		bool IsAdjacentToSymbol(const Vector<Vector<CellContent>>& cellMap) const
+		bool IsAdjacentToAnySymbol(const Vector<Vector<CellContent>>& cellMap) const
 		{
 			if constexpr (IsDebug())
 			{
@@ -47,7 +48,8 @@ export namespace aoc
 					switch (row[column])
 					{
 					case CellContent::Empty: debugRow.append("."); break;
-					case CellContent::Symbol: debugRow.append("s"); break;
+					case CellContent::Symbol_PotentialGear: debugRow.append("G"); break;
+					case CellContent::Symbol_Other: debugRow.append("s"); break;
 					case CellContent::Number: debugRow.append("#"); break;
 					default: Assert(false); break;
 					}
@@ -60,12 +62,16 @@ export namespace aoc
 			const Vector<CellContent>& myRow = cellMap[RowIndex];
 			debugOutputRow(myRow);
 
-			if (InBounds(myRow, LocationBeginInclusive - 1) && myRow[LocationBeginInclusive - 1] == CellContent::Symbol)
+			if (InBounds(myRow, LocationBeginInclusive - 1) &&
+				(myRow[LocationBeginInclusive - 1] == CellContent::Symbol_PotentialGear
+					|| myRow[LocationBeginInclusive - 1] == CellContent::Symbol_Other))
 			{
 				return true;
 			}
 
-			if (InBounds(myRow, LocationEndExclusive) && myRow[LocationEndExclusive] == CellContent::Symbol)
+			if (InBounds(myRow, LocationEndExclusive) &&
+				(myRow[LocationEndExclusive] == CellContent::Symbol_PotentialGear
+					|| myRow[LocationEndExclusive] == CellContent::Symbol_Other))
 			{
 				return true;
 			}
@@ -74,7 +80,9 @@ export namespace aoc
 			auto evaluateRow = [&](const Vector<CellContent>& row) -> bool {
 				for (s32 column = (s32)LocationBeginInclusive - 1; column <= (s32)LocationEndExclusive; column++)
 				{
-					if (InBounds(row, column) && row[column] == CellContent::Symbol)
+					if (InBounds(row, column) &&
+						(row[column] == CellContent::Symbol_PotentialGear
+							|| row[column] == CellContent::Symbol_Other))
 					{
 						return true;
 					}
@@ -99,6 +107,28 @@ export namespace aoc
 				const Vector<CellContent>& bottomRow = cellMap[RowIndex + 1];
 				debugOutputRow(bottomRow);
 				if (evaluateRow(bottomRow))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		bool IsAdjacentToLocation(u32 rowIdx, u32 columnIdx) const
+		{
+			auto dist = [](u32 lhs, u32 rhs) {
+				return std::abs(static_cast<s32>(lhs) - static_cast<s32>(rhs));
+			};
+
+			if (dist(rowIdx, RowIndex) > 1)
+			{
+				return false;
+			}
+
+			for (u32 i = LocationBeginInclusive; i < LocationEndExclusive; i++)
+			{
+				if (dist(columnIdx, i) <= 1)
 				{
 					return true;
 				}
@@ -179,7 +209,15 @@ export namespace aoc
 				}
 
 				// Handle symbol
-				row[symbolPosition] = CellContent::Symbol;
+				const char symbolChar = subContent[symbolLocalPosition];
+				if (symbolChar == '*')
+				{
+					row[symbolPosition] = CellContent::Symbol_PotentialGear;
+				}
+				else
+				{
+					row[symbolPosition] = CellContent::Symbol_Other;
+				}
 
 				// Handle after
 				String substringAfterSymbol = subContent.substr(symbolLocalPosition + 1);
@@ -229,7 +267,8 @@ export namespace aoc
 					switch (content)
 					{
 					case CellContent::Empty: debugRow.append("."); break;
-					case CellContent::Symbol: debugRow.append("s"); break;
+					case CellContent::Symbol_PotentialGear: debugRow.append("G"); break;
+					case CellContent::Symbol_Other: debugRow.append("s"); break;
 					case CellContent::Number: debugRow.append("#"); break;
 					default: Assert(false); break;
 					}
@@ -241,7 +280,7 @@ export namespace aoc
 		s32 result = 0;
 		for (const NumberInfo& numberInfo : foundNumbers)
 		{
-			const bool numberIsPartNumber = numberInfo.IsAdjacentToSymbol(rows);
+			const bool numberIsPartNumber = numberInfo.IsAdjacentToAnySymbol(rows);
 			if constexpr (IsDebug())
 			{
 				Log(numberIsPartNumber ? "TRUE" : "FALSE");
@@ -258,6 +297,86 @@ export namespace aoc
 
 	export String ExecutePart2()
 	{
-		return "";
+		auto input = OpenInput("day3.txt");
+
+		Vector<Vector<CellContent>> rows(140);
+		Vector<NumberInfo> foundNumbers;
+
+		u32 currentRowIdx = 0;
+		u32 lastRowWidth = 0;
+		String line;
+		while (std::getline(input, line))
+		{
+			const u32 currentRowWidth = NarrowSizeT(line.size());
+			if (lastRowWidth == 0)
+			{
+				lastRowWidth = currentRowWidth;
+			}
+			Assert(currentRowWidth == lastRowWidth);
+
+			Vector<CellContent>& currentRow = rows[currentRowIdx];
+			currentRow.assign(currentRowWidth, CellContent::Empty);
+
+			TokenizeAndParse(currentRowIdx, currentRow, foundNumbers, 0, line);
+
+			currentRowIdx++;
+		}
+
+		if constexpr (IsDebug())
+		{
+			for (const Vector<CellContent>& row : rows)
+			{
+				String debugRow;
+				for (CellContent content : row)
+				{
+					switch (content)
+					{
+					case CellContent::Empty: debugRow.append("."); break;
+					case CellContent::Symbol_PotentialGear: debugRow.append("G"); break;
+					case CellContent::Symbol_Other: debugRow.append("s"); break;
+					case CellContent::Number: debugRow.append("#"); break;
+					default: Assert(false); break;
+					}
+				}
+				Log(debugRow);
+			}
+		}
+
+		u32 result = 0;
+		for (u32 rowIdx = 0; rowIdx < rows.size(); rowIdx++)
+		{
+			const Vector<CellContent>& row = rows[rowIdx];
+			for (u32 columnIdx = 0; columnIdx < row.size(); columnIdx++)
+			{
+				const CellContent cell = row[columnIdx];
+				if (cell != CellContent::Symbol_PotentialGear)
+				{
+					continue;
+				}
+
+				Vector<u32> adjacentNumbers;
+				for (const NumberInfo& numberInfo : foundNumbers)
+				{
+					if (numberInfo.IsAdjacentToLocation(rowIdx, columnIdx))
+					{
+						adjacentNumbers.push_back(numberInfo.Value);
+					}
+				}
+
+				if (adjacentNumbers.size() != 2)
+				{
+					continue;
+				}
+
+				const u32 gearRatio = adjacentNumbers[0] * adjacentNumbers[1];
+				if constexpr (IsDebug())
+				{
+					LogFormat("Gear row {} column {} has ratio {}", rowIdx, columnIdx, gearRatio);
+				}
+				result += gearRatio;
+			}
+		}
+
+		return std::to_string(result);
 	}
 }

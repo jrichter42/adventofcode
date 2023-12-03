@@ -13,7 +13,7 @@ export namespace aoc
 		return std::format(formatString, std::forward<Args>(args)...);
 	}
 
-	Vector<String> Split(const String& string, const String& delimiterStr)
+	Vector<String> Split(const String& string, const String& delimiterStr, Vector<u32>* outPositions = nullptr)
 	{
 		Vector<String> result;
 
@@ -21,15 +21,29 @@ export namespace aoc
 		while (searchPos < string.size())
 		{
 			size_t occurence = string.find(delimiterStr, searchPos);
+
 			if (occurence == String::npos)
 			{
-				if (searchPos < (string.size() - delimiterStr.size()))
+				if (searchPos < string.size())
 				{
 					result.push_back(string.substr(searchPos));
+					if (outPositions)
+					{
+						outPositions->push_back(static_cast<u32>(searchPos));
+					}
 				}
 				break;
 			}
-			result.push_back(string.substr(searchPos, occurence - searchPos));
+
+			if (occurence != searchPos)
+			{
+				result.push_back(string.substr(searchPos, occurence - searchPos));
+				if (outPositions)
+				{
+					outPositions->push_back(static_cast<u32>(searchPos));
+				}
+			}
+
 			searchPos = occurence + delimiterStr.size();
 		}
 

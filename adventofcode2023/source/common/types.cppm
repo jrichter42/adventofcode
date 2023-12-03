@@ -25,7 +25,7 @@ export namespace aoc
 
 	using std::ifstream;
 
-	//Numeric types
+	// Numeric types
 	//--------------------------------------------------
 	using s8 = int8_t;
 	using u8 = uint8_t;
@@ -45,7 +45,7 @@ export namespace aoc
 	using byte = unsigned char;
 	//using uint = unsigned int;
 
-	//Numeric limits
+	// Numeric limits
 	//--------------------------------------------------
 	constexpr const s8 s8_MAX = INT8_MAX;
 	constexpr const s8 s8_MIN = INT8_MIN;
@@ -68,7 +68,7 @@ export namespace aoc
 	constexpr const f64 f64_MAX = DBL_MAX;
 	constexpr const f64 f64_MIN = DBL_MIN;
 
-	//Numeric conversion
+	// Numeric conversion
 	//--------------------------------------------------
 	template<typename SignedT, typename UnsignedT>
 	UnsignedT SignedToUnsignedImpl(const SignedT& value)
@@ -83,4 +83,24 @@ export namespace aoc
 	u16 ToUnsigned(s16 value) { return SignedToUnsignedImpl<s16, u16>(value); }
 	u32 ToUnsigned(s32 value) { return SignedToUnsignedImpl<s32, u32>(value); }
 	u64 ToUnsigned(s64 value) { return SignedToUnsignedImpl<s64, u64>(value); }
+
+	u32 NarrowSizeT(const size_t& value)
+	{
+		Assert(value <= std::numeric_limits<u32>::max());
+		return static_cast<u32>(value);
+	}
+
+	// Container utils
+	//--------------------------------------------------
+	template<typename ContainerT>
+	bool InBounds(const ContainerT& container, u32 index)
+	{
+		return index < container.size();
+	}
+
+	template<typename ContainerT>
+	bool InBounds(const ContainerT& container, s32 index)
+	{
+		return index >= 0 && index < container.size();
+	}
 }

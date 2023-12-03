@@ -11,4 +11,12 @@ export import <algorithm>;
 
 export namespace aoc
 {
+	constexpr bool IsDebug()
+	{
+#ifdef _DEBUG
+		return true;
+#elif _RELEASE
+		return false;
+#endif // DEBUG || RELEASE
+	}
 }

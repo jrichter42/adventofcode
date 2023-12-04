@@ -54,7 +54,6 @@ export namespace aoc
 					default: Assert(false); break;
 					}
 				}
-				//Assert(debugRow != "|...s");
 				Log(debugRow);
 			};
 

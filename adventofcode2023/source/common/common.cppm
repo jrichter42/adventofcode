@@ -8,6 +8,8 @@ export import stringutils;
 export import fileutils;
 
 export import <algorithm>;
+export import <thread>;
+export import <future>;
 
 export namespace aoc
 {

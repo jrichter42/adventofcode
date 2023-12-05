@@ -21,6 +21,7 @@
     <ClCompile Include="source\day2.cppm" />
     <ClCompile Include="source\day3.cppm" />
     <ClCompile Include="source\day4.cppm" />
+    <ClCompile Include="source\day5.cppm" />
     <ClCompile Include="source\main.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

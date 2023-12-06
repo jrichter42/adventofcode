@@ -59,6 +59,42 @@ export namespace aoc
 
 	export String ExecutePart2()
 	{
-		return "";
+		auto input = OpenInput("day6.txt");
+
+		String line;
+
+		std::getline(input, line);
+
+		Vector<String> timeInfo = Split(line, ":");
+		Assert(timeInfo[0] == "Time");
+		String& timeString = timeInfo[1];
+		timeString.erase(std::remove(timeString.begin(), timeString.end(), ' '), timeString.end());
+
+		std::getline(input, line);
+
+		Vector<String> distanceInfo = Split(line, ":");
+		Assert(distanceInfo[0] == "Distance");
+		String& distanceString = distanceInfo[1];
+		distanceString.erase(std::remove(distanceString.begin(), distanceString.end(), ' '), distanceString.end());
+
+		const u64 time = std::stoll(timeString);
+		const u64 distance = std::stoll(distanceString);
+
+		u32 successAttempts = 0;
+		for (u64 msUntilRelease = 0; msUntilRelease <= time; msUntilRelease++)
+		{
+			const u64 msAfterRelease = time - msUntilRelease;
+			const u64 speedAfterRelease = msUntilRelease;
+			const u64 attemptDistance = msAfterRelease * speedAfterRelease;
+
+			if (attemptDistance > distance)
+			{
+				successAttempts++;
+			}
+		}
+
+		const u32 raceMarginOfError = successAttempts;
+
+		return std::to_string(raceMarginOfError);
 	}
 }

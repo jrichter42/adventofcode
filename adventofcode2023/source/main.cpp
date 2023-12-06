@@ -1,6 +1,6 @@
 import common;
 
-import day5;
+import day6;
 
 constexpr bool EXECUTE_PART1 = true;
 constexpr bool EXECUTE_PART2 = true;

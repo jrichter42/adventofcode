@@ -25,6 +25,7 @@
     <ClCompile Include="source\day3.cppm" />
     <ClCompile Include="source\day4.cppm" />
     <ClCompile Include="source\day5.cppm" />
+    <ClCompile Include="source\day6.cppm" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="common">

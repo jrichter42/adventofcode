@@ -22,6 +22,27 @@ export namespace aoc
 		Ace
 	};
 
+	Card CharToCard(char c)
+	{
+		switch (c)
+		{
+			case '2': return Card::two;
+			case '3': return Card::three;
+			case '4': return Card::four;
+			case '5': return Card::five;
+			case '6': return Card::six;
+			case '7': return Card::seven;
+			case '8': return Card::eight;
+			case '9': return Card::nine;
+			case 'T': return Card::Ten;
+			case 'J': return Card::Jack;
+			case 'Q': return Card::Queen;
+			case 'K': return Card::King;
+			case 'A': return Card::Ace;
+		}
+		return Card::Invalid;
+	}
+
 	enum class HandType
 	{
 		Invalid,
@@ -149,23 +170,9 @@ export namespace aoc
 				const char cardChar = handString[i];
 				Card& cardToWrite = hand.Cards[i];
 
-				switch (cardChar)
-				{
-					case '2': cardToWrite = Card::two; break;
-					case '3': cardToWrite = Card::three; break;
-					case '4': cardToWrite = Card::four; break;
-					case '5': cardToWrite = Card::five; break;
-					case '6': cardToWrite = Card::six; break;
-					case '7': cardToWrite = Card::seven; break;
-					case '8': cardToWrite = Card::eight; break;
-					case '9': cardToWrite = Card::nine; break;
-					case 'T': cardToWrite = Card::Ten; break;
-					case 'J': cardToWrite = Card::Jack; break;
-					case 'Q': cardToWrite = Card::Queen; break;
-					case 'K': cardToWrite = Card::King; break;
-					case 'A': cardToWrite = Card::Ace; break;
-					default: Assert(false, "Unkown char for card"); break;
-				}
+				Card card = CharToCard(cardChar);
+				Assert(card != Card::Invalid, "Unkown char for card");
+				cardToWrite = card;
 			}
 			hand.DetermineType();
 			hands.push_back(std::move(hand));

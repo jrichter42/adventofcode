@@ -4,6 +4,7 @@ export import <iterator>;
 export import <vector>;
 export import <array>;
 export import <unordered_map>;
+export import <map>;
 
 export import <string>;
 

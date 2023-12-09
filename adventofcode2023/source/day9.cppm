@@ -39,7 +39,6 @@ export namespace aoc
 		const s32 derivativeSequenceNextValue = CalculateNextValueInSequence(derivativeSequence);
 
 		return lastValue + derivativeSequenceNextValue;
-
 	}
 
 	export String ExecutePart1()
@@ -67,6 +66,26 @@ export namespace aoc
 
 	export String ExecutePart2()
 	{
-		return "";
+		auto input = OpenInput("day9.txt");
+
+		s64 extrapolatedValuesSum = 0;
+		String line;
+		while (std::getline(input, line))
+		{
+			Vector<String> valueStrings = Split(line, " ");
+			Vector<s32> values;
+			for (const String& valueString : valueStrings)
+			{
+				const s32 value = std::stoi(valueString);
+				values.push_back(value);
+			}
+
+			std::reverse(values.begin(), values.end()y);
+
+			const s32 nextSequenceValue = CalculateNextValueInSequence(values);
+			extrapolatedValuesSum += nextSequenceValue;
+		}
+
+		return std::to_string(extrapolatedValuesSum);
 	}
 }

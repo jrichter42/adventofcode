@@ -22,6 +22,13 @@ export namespace aoc
 	template<typename T>
 	using Vector = std::vector<T>;
 
+	template<typename T>
+	bool Contains(const Vector<T>& vector, const T& value)
+	{
+		auto it = std::find(vector.begin(), vector.end(), value);
+		return it != vector.end();
+	};
+
 	template<typename T, size_t Size>
 	using Array = std::array<T, Size>;
 

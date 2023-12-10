@@ -80,7 +80,7 @@ export namespace aoc
 				values.push_back(value);
 			}
 
-			std::reverse(values.begin(), values.end()y);
+			std::reverse(values.begin(), values.end());
 
 			const s32 nextSequenceValue = CalculateNextValueInSequence(values);
 			extrapolatedValuesSum += nextSequenceValue;

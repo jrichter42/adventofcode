@@ -4,11 +4,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.6.33801.468
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "2023", "2023\2023.vcxproj", "{03766CA0-1C43-4F3C-B723-0C719DADB0BF}"
-	ProjectSection(ProjectDependencies) = postProject
-		{B8BE9474-61FC-4012-8196-9FF14492842E} = {B8BE9474-61FC-4012-8196-9FF14492842E}
-	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "blib", "2023\extern\blib\blib.vcxproj", "{B8BE9474-61FC-4012-8196-9FF14492842E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "blib", "2023\extern\blib\blib.vcxproj", "{EB8B4590-97DC-4851-96F7-7481F61CA6CE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,10 +17,10 @@ Global
 		{03766CA0-1C43-4F3C-B723-0C719DADB0BF}.Debug|x64.Build.0 = Debug|x64
 		{03766CA0-1C43-4F3C-B723-0C719DADB0BF}.Release|x64.ActiveCfg = Release|x64
 		{03766CA0-1C43-4F3C-B723-0C719DADB0BF}.Release|x64.Build.0 = Release|x64
-		{B8BE9474-61FC-4012-8196-9FF14492842E}.Debug|x64.ActiveCfg = Debug|x64
-		{B8BE9474-61FC-4012-8196-9FF14492842E}.Debug|x64.Build.0 = Debug|x64
-		{B8BE9474-61FC-4012-8196-9FF14492842E}.Release|x64.ActiveCfg = Release|x64
-		{B8BE9474-61FC-4012-8196-9FF14492842E}.Release|x64.Build.0 = Release|x64
+		{EB8B4590-97DC-4851-96F7-7481F61CA6CE}.Debug|x64.ActiveCfg = Debug|x64
+		{EB8B4590-97DC-4851-96F7-7481F61CA6CE}.Debug|x64.Build.0 = Debug|x64
+		{EB8B4590-97DC-4851-96F7-7481F61CA6CE}.Release|x64.ActiveCfg = Release|x64
+		{EB8B4590-97DC-4851-96F7-7481F61CA6CE}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

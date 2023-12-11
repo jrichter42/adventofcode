@@ -27,7 +27,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="extern\blib\blib.vcxproj">
-      <Project>{b8be9474-61fc-4012-8196-9ff14492842e}</Project>
+      <Project>{EB8B4590-97DC-4851-96F7-7481F61CA6CE}</Project>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">

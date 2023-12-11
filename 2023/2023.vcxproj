@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\common\common.cppm" />
+    <ClCompile Include="source\common.cppm" />
     <ClCompile Include="source\day1.cppm" />
     <ClCompile Include="source\day10.cppm" />
     <ClCompile Include="source\day11.cppm" />

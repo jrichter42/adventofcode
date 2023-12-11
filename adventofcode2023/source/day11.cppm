@@ -42,6 +42,32 @@ export namespace aoc
 		u32 GalaxyID = GalaxyID_Invalid;
 		u32 PosX = 0;
 		u32 PosY = 0;
+
+		u64 PosXExpanded(Vector<u32> expandedColumns) const
+		{
+			u64 result = PosX;
+			for (u32 expandedColumn : expandedColumns)
+			{
+				if (expandedColumn < PosX)
+				{
+					result += 1000000 - 1;
+				}
+			}
+			return result;
+		}
+
+		u64 PosYExpanded(Vector<u32> expandedRows) const
+		{
+			u64 result = PosY;
+			for (u32 expandedRow : expandedRows)
+			{
+				if (expandedRow < PosY)
+				{
+					result += 1000000 - 1;
+				}
+			}
+			return result;
+		}
 	};
 
 	export String ExecutePart1()
@@ -167,6 +193,98 @@ export namespace aoc
 
 	export String ExecutePart2()
 	{
-		return "";
+		auto input = OpenInput("day11.txt");
+
+		Vector<Vector<Cell>> map;
+
+		String line;
+		while (std::getline(input, line))
+		{
+			Vector<Cell>& row = map.emplace_back();
+			for (const char c : line)
+			{
+				if (c == '#')
+				{
+					row.emplace_back(true);
+					continue;
+				}
+				Assert(c == '.');
+				row.emplace_back(false);
+			}
+		}
+
+		const u32 rowsCount = NarrowSizeT(map.size());
+		const u32 columnsCount = NarrowSizeT(map[0].size());
+
+		// collect rows
+		Vector<u32> rowsToExpand;
+		for (u32 y = 0; y < map.size(); y++)
+		{
+			const Vector<Cell>& row = map[y];
+
+			auto it = std::find(row.begin(), row.end(), '#');
+			if (it != row.end())
+			{
+				continue;
+			}
+
+			rowsToExpand.push_back(y);
+		}
+
+		// collect columns
+		Vector<u32> columnsToExpand;
+		for (u32 x = 0; x < columnsCount; x++)
+		{
+			bool foundGalaxy = false;
+			for (u32 y = 0; y < map.size(); y++)
+			{
+				const Vector<Cell>& row = map[y];
+				Assert(row.size() == columnsCount);
+				const Cell& cell = row[x];
+
+				if (cell == '#')
+				{
+					foundGalaxy = true;
+					break;
+				}
+			}
+
+			if (foundGalaxy == false)
+			{
+				columnsToExpand.push_back(x);
+			}
+		}
+
+		Vector<Cell*> galaxies;
+		for (u32 y = 0; y < rowsCount; y++)
+		{
+			Vector<Cell>& row = map[y];
+			for (u32 x = 0; x < columnsCount; x++)
+			{
+				Cell& cell = row[x];
+				if (cell.IsGalaxy)
+				{
+					cell.PosX = x;
+					cell.PosY = y;
+					galaxies.push_back(&cell);
+				}
+			}
+		}
+
+		u64 distanceStepsSum = 0;
+		for (auto firstIt = galaxies.begin(); firstIt < galaxies.end(); firstIt++)
+		{
+			for (auto secondIt = firstIt + 1; secondIt < galaxies.end(); secondIt++)
+			{
+				const Cell* lhs = *firstIt;
+				const Cell* rhs = *secondIt;
+				const u64 distanceX = (u32)std::abs((s32)lhs->PosXExpanded(columnsToExpand) - (s32)rhs->PosXExpanded(columnsToExpand));
+				const u64 distanceY = (u32)std::abs((s32)lhs->PosYExpanded(rowsToExpand) - (s32)rhs->PosYExpanded(rowsToExpand));
+				const u64 distanceSteps = distanceX + distanceY;
+				distanceStepsSum += distanceSteps;
+			}
+		}
+
+		return std::to_string(distanceStepsSum);
 	}
 }

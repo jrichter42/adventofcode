@@ -8,28 +8,22 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "adventofcode2023", "advento
 		{B8BE9474-61FC-4012-8196-9FF14492842E} = {B8BE9474-61FC-4012-8196-9FF14492842E}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "blib", "adventofcode2023\extern\blib\blib.vcxproj", "{B8BE9474-61FC-4012-8196-9FF14492842E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B8BE9474-61FC-4012-8196-9FF14492842E}.Debug|x64.ActiveCfg = Debug|x64
-		{B8BE9474-61FC-4012-8196-9FF14492842E}.Debug|x64.Build.0 = Debug|x64
-		{B8BE9474-61FC-4012-8196-9FF14492842E}.Release|x64.ActiveCfg = Release|x64
-		{B8BE9474-61FC-4012-8196-9FF14492842E}.Release|x64.Build.0 = Release|x64
-		{D383BBD2-7410-4DF3-BE4A-05917BF32E26}.Debug|x64.ActiveCfg = Debug|x64
-		{D383BBD2-7410-4DF3-BE4A-05917BF32E26}.Debug|x64.Build.0 = Debug|x64
-		{D383BBD2-7410-4DF3-BE4A-05917BF32E26}.Release|x64.ActiveCfg = Release|x64
-		{D383BBD2-7410-4DF3-BE4A-05917BF32E26}.Release|x64.Build.0 = Release|x64
 		{03766CA0-1C43-4F3C-B723-0C719DADB0BF}.Debug|x64.ActiveCfg = Debug|x64
 		{03766CA0-1C43-4F3C-B723-0C719DADB0BF}.Debug|x64.Build.0 = Debug|x64
 		{03766CA0-1C43-4F3C-B723-0C719DADB0BF}.Release|x64.ActiveCfg = Release|x64
 		{03766CA0-1C43-4F3C-B723-0C719DADB0BF}.Release|x64.Build.0 = Release|x64
-		{D220A541-AFD1-4CC9-BFED-AFE54DB2F9B7}.Debug|x64.ActiveCfg = Debug|x64
-		{D220A541-AFD1-4CC9-BFED-AFE54DB2F9B7}.Debug|x64.Build.0 = Debug|x64
-		{D220A541-AFD1-4CC9-BFED-AFE54DB2F9B7}.Release|x64.ActiveCfg = Release|x64
-		{D220A541-AFD1-4CC9-BFED-AFE54DB2F9B7}.Release|x64.Build.0 = Release|x64
+		{B8BE9474-61FC-4012-8196-9FF14492842E}.Debug|x64.ActiveCfg = Debug|x64
+		{B8BE9474-61FC-4012-8196-9FF14492842E}.Debug|x64.Build.0 = Debug|x64
+		{B8BE9474-61FC-4012-8196-9FF14492842E}.Release|x64.ActiveCfg = Release|x64
+		{B8BE9474-61FC-4012-8196-9FF14492842E}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

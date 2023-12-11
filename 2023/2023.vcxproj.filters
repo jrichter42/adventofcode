@@ -7,21 +7,6 @@
     <ClCompile Include="source\common\common.cppm">
       <Filter>common</Filter>
     </ClCompile>
-    <ClCompile Include="source\common\stringutils.cppm">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="source\common\types.cppm">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="source\common\fileutils.cppm">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="source\common\logging.cppm">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="source\common\assertion.cppm">
-      <Filter>common</Filter>
-    </ClCompile>
     <ClCompile Include="source\day3.cppm" />
     <ClCompile Include="source\day4.cppm" />
     <ClCompile Include="source\day5.cppm" />

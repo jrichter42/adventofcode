@@ -5,8 +5,6 @@ import day11;
 constexpr bool EXECUTE_PART1 = true;
 constexpr bool EXECUTE_PART2 = true;
 
-import <chrono>;
-
 int main(int argc, char* argv[])
 {
 	using namespace aoc;

@@ -141,7 +141,7 @@ export namespace aoc
 	{
 		const char* contentBegin = content.c_str();
 		char* strtolEnd;
-		const s32 numberSigned = strtol(contentBegin, &strtolEnd, 10);
+		const s32 numberSigned = std::strtol(contentBegin, &strtolEnd, 10);
 
 		Assert(strtolEnd != contentBegin, "no character was interpreted as number");
 

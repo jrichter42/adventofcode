@@ -74,7 +74,7 @@ export namespace aoc
 		{
 			Vector<String> game = Split(line, ": ");
 
-			String gameIDStr = game[0].substr(strlen("Game "));
+			String gameIDStr = game[0].substr(std::strlen("Game "));
 			u32 gameID = ToUnsigned(stoi(gameIDStr));
 
 			CubeSet drawnCubes = CalculateCubesNeededForGame(game[1]);

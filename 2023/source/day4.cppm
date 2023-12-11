@@ -96,7 +96,7 @@ export namespace aoc
 			for (const String& winningNumberStr : winningNumberStrings)
 			{
 				char* strtolEnd;
-				const s32 winningNumberSigned = strtol(winningNumberStr.c_str(), &strtolEnd, 10);
+				const s32 winningNumberSigned = std::strtol(winningNumberStr.c_str(), &strtolEnd, 10);
 				Assert(strtolEnd != winningNumberStr.c_str(), "no character was interpreted as number");
 
 				card.WinningNumbers.push_back(winningNumberSigned);
@@ -105,7 +105,7 @@ export namespace aoc
 			for (const String& myNumberStr : myNumberStrings)
 			{
 				char* strtolEnd;
-				const s32 myNumberSigned = strtol(myNumberStr.c_str(), &strtolEnd, 10);
+				const s32 myNumberSigned = std::strtol(myNumberStr.c_str(), &strtolEnd, 10);
 				Assert(strtolEnd != myNumberStr.c_str(), "no character was interpreted as number");
 
 				card.MyNumbers.push_back(myNumberSigned);
@@ -144,7 +144,7 @@ export namespace aoc
 			for (const String& winningNumberStr : winningNumberStrings)
 			{
 				char* strtolEnd;
-				const s32 winningNumberSigned = strtol(winningNumberStr.c_str(), &strtolEnd, 10);
+				const s32 winningNumberSigned = std::strtol(winningNumberStr.c_str(), &strtolEnd, 10);
 				Assert(strtolEnd != winningNumberStr.c_str(), "no character was interpreted as number");
 
 				card.WinningNumbers.push_back(winningNumberSigned);
@@ -153,7 +153,7 @@ export namespace aoc
 			for (const String& myNumberStr : myNumberStrings)
 			{
 				char* strtolEnd;
-				const s32 myNumberSigned = strtol(myNumberStr.c_str(), &strtolEnd, 10);
+				const s32 myNumberSigned = std::strtol(myNumberStr.c_str(), &strtolEnd, 10);
 				Assert(strtolEnd != myNumberStr.c_str(), "no character was interpreted as number");
 
 				card.MyNumbers.push_back(myNumberSigned);

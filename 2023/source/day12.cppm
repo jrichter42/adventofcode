@@ -354,7 +354,7 @@ export namespace aoc
 		{
 			SpringRow& row = springRows[rowIndex];
 
-			// we might be fine to reference the same almanac as we only read but better not risk it, this copy shouldn't be relevant
+			// we might be fine to reference the same data as we only read but better not risk it, this copy shouldn't be relevant
 			workers.emplace_back(workerID,
 				[row, workerID](std::promise<u64>&& promise) mutable
 			{

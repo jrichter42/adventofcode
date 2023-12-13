@@ -12,6 +12,30 @@ export namespace aoc
 		Unknown
 	};
 
+	SpringCondition CharToSpringCondition(char c)
+	{
+		switch (c)
+		{
+			case '.': return SpringCondition::Operational;
+			case '#': return SpringCondition::Damaged;
+			case '?': return SpringCondition::Unknown;
+		}
+		Assert(false);
+		return SpringCondition::Invalid;
+	}
+
+	char SpringConditionToChar(SpringCondition condition)
+	{
+		switch (condition)
+		{
+			case SpringCondition::Unknown: return '?';
+			case SpringCondition::Damaged: return '#';
+			case SpringCondition::Operational: return '.';
+		}
+		Assert(false);
+		return ' ';
+	}
+
 	enum class RowContentType
 	{
 		Group,
@@ -27,40 +51,138 @@ export namespace aoc
 		{}
 
 		u32 Size = 0;
-		u32 FloatingSpaces = 0;
 		RowContentType Type = RowContentType::Group;
 
-		RowContent* NextSpacer = nullptr;
+		RowContent* NextContent = nullptr;
 
-		template<typename Func>
-		void PropagateSpaces(u32 spaces, Func&& onSpacesPropagated, u32 depth = 0)
+		struct FindSubArrangementsCacheEntry
 		{
-			if (NextSpacer == nullptr)
+			FindSubArrangementsCacheEntry(u32 rowPos, u32 spaces, u64 result)
+				: CurrentRowPos(rowPos)
+				, RemainingFloatingSpaces(spaces)
+				, Result(result)
+			{}
+
+			constexpr bool operator<(const FindSubArrangementsCacheEntry& rhs)
 			{
-				if constexpr (IsDebug())
+				if (CurrentRowPos != rhs.CurrentRowPos)
 				{
-					LogFormat("{} x {}\n", depth, spaces);
+					return CurrentRowPos < rhs.CurrentRowPos;
 				}
-				FloatingSpaces = spaces;
-				onSpacesPropagated();
-				return;
+				return RemainingFloatingSpaces < rhs.RemainingFloatingSpaces;
 			}
 
-			for (u32 i = 0; i <= spaces; i++)
+			constexpr bool operator==(const FindSubArrangementsCacheEntry& other)
 			{
+				return CurrentRowPos == other.CurrentRowPos
+					&& RemainingFloatingSpaces == other.RemainingFloatingSpaces;
+			}
+
+			u32 CurrentRowPos = 0;
+			u32 RemainingFloatingSpaces = 0;
+			u64 Result = 0;
+		};
+
+		Vector<FindSubArrangementsCacheEntry> FindSubArrangementsCache;
+
+		u64 PropagateSpacesAndFindValidArrangements(const Vector<SpringCondition>& row, u32 currentRowPos, u32 spaces, u32 recursionDepth = 0)
+		{
+			if constexpr (IsDebug() && false)
+			{
+				if (currentRowPos < row.size())
+				{
+					LogFormat("{} {}", currentRowPos, SpringConditionToChar(row[currentRowPos]));
+				}
+				else
+				{
+					LogFormat("{} {}", currentRowPos, "out of bounds");
+				}
+			}
+
+			auto cacheIt = std::find(FindSubArrangementsCache.begin(), FindSubArrangementsCache.end(), FindSubArrangementsCacheEntry(currentRowPos, spaces, 0));
+			if (cacheIt != FindSubArrangementsCache.end())
+			{
+				const FindSubArrangementsCacheEntry& cacheEntry = *cacheIt;
 				if constexpr (IsDebug())
 				{
-					LogFormat("{} > {}", depth, i);
+					String depthVisualizationStr; for (u32 debugI = 0; debugI < recursionDepth; debugI++) { depthVisualizationStr += '>'; }
+					LogFormat("{} {} _ #{}", depthVisualizationStr, spaces, cacheEntry.Result);
 				}
-				FloatingSpaces = i;
-				const u32 remainingSpaces = spaces - i;
-				NextSpacer->PropagateSpaces(remainingSpaces, onSpacesPropagated, depth + 1);
+				return cacheEntry.Result;
 			}
+
+			u64 numValidArrangements = 0;
+			if (Type == RowContentType::Group)
+			{
+				// GROUP
+				if (CouldBeAt(row, currentRowPos, 0))
+				{
+					if constexpr (IsDebug())
+					{
+						String depthVisualizationStr; for (u32 debugI = 0; debugI < recursionDepth; debugI++) { depthVisualizationStr += '>'; }
+						LogFormat("{} {} - {}", depthVisualizationStr, spaces, spaces);
+					}
+					const u64 numValidSubArrangements = NextContent->PropagateSpacesAndFindValidArrangements(row, currentRowPos + Size, spaces, recursionDepth + 1);
+					numValidArrangements += numValidSubArrangements;
+				}
+			}
+			else
+			{
+				// SPACER
+
+				if (NextContent == nullptr)
+				{
+					const u32 myFloatingSpaces = spaces;
+					if (CouldBeAt(row, currentRowPos, myFloatingSpaces))
+					{
+						if constexpr (IsDebug())
+						{
+							String depthVisualizationStr; for (u32 debugI = 0; debugI < recursionDepth; debugI++) { depthVisualizationStr += '>'; }
+							LogFormat("{} {} < #1 |", depthVisualizationStr, spaces);
+						}
+						return 1; // bypassing cache is fine, this is cheap enough
+					}
+					if constexpr (IsDebug())
+					{
+						String depthVisualizationStr; for (u32 debugI = 0; debugI < recursionDepth; debugI++) { depthVisualizationStr += '>'; }
+						LogFormat("{} {} < #0 |", depthVisualizationStr, spaces);
+					}
+					return 0; // bypassing cache is fine, this is cheap enough
+				}
+
+				for (u32 i = 0; i <= spaces; i++)
+				{
+					const u32 ownFloatingSpaces = i;
+					const u32 remainingSpaces = spaces - ownFloatingSpaces;
+					if (CouldBeAt(row, currentRowPos, ownFloatingSpaces))
+					{
+						const u32 ownSize = Size + ownFloatingSpaces;
+
+						if constexpr (IsDebug())
+						{
+							String depthVisualizationStr; for (u32 debugI = 0; debugI < recursionDepth; debugI++) { depthVisualizationStr += '>'; }
+							LogFormat("{} {} > {}", depthVisualizationStr, spaces, remainingSpaces);
+						}
+						const u64 numValidSubArrangements = NextContent->PropagateSpacesAndFindValidArrangements(row, currentRowPos + ownSize, remainingSpaces, recursionDepth + 1);
+						numValidArrangements += numValidSubArrangements;
+					}
+				}
+			}
+
+			// GROUP & SPACER
+			if constexpr (IsDebug())
+			{
+				String depthVisualizationStr; for (u32 debugI = 0; debugI < recursionDepth; debugI++) { depthVisualizationStr += '>'; }
+				LogFormat("{} {} < #{}", depthVisualizationStr, spaces, numValidArrangements);
+			}
+
+			FindSubArrangementsCache.emplace_back(currentRowPos, spaces, numValidArrangements);
+			return numValidArrangements;
 		}
 
-		bool CouldBeAt(const Vector<SpringCondition>& row, u32 startIndex) const
+		bool CouldBeAt(const Vector<SpringCondition>& row, u32 startIndex, u32 floatingSpaces) const
 		{
-			const u32 ownSize = Size + FloatingSpaces;
+			const u32 ownSize = Size + floatingSpaces;
 			if (ownSize == 0)
 			{
 				return true;
@@ -136,18 +258,15 @@ export namespace aoc
 			}
 
 			u32 minRowWidthNeeded = 0;
-			RowContent* lastSpacer = nullptr;
+			RowContent* lastContent = nullptr;
 			for (RowContent& content : playground)
 			{
 				minRowWidthNeeded += content.Size;
-				if (content.Type != RowContentType::Group)
+				if (lastContent != nullptr)
 				{
-					if (lastSpacer != nullptr)
-					{
-						lastSpacer->NextSpacer = &content;
-					}
-					lastSpacer = &content;
+					lastContent->NextContent = &content;
 				}
+				lastContent = &content;
 			}
 
 			if (rowWidth < minRowWidthNeeded)
@@ -157,44 +276,34 @@ export namespace aoc
 
 			const u32 floatingWidth = rowWidth - minRowWidthNeeded;
 
-			RowContent& firstSpacer = playground[0];
-			Assert(firstSpacer.Type == RowContentType::BorderSpacer);
-
-			u64 validPlaygrounds = 0;
-			auto testCurrentPlayground = [&]() {
-				u32 currentRowIndex = 0;
-				for (const RowContent& content : playground)
-				{
-					const u32 contentSize = content.Size + content.FloatingSpaces;
-					const bool contentHappy = content.CouldBeAt(Input_ConditionRecords, currentRowIndex);
-					if (contentHappy == false)
-					{
-						return;
-					}
-					currentRowIndex += contentSize;
-
-					if (currentRowIndex > rowWidth)
-					{
-						return;
-					}
-				}
-
-				validPlaygrounds++;
-			};
-
-			if (floatingWidth == 0)
-			{
-				testCurrentPlayground();
-				return validPlaygrounds;
-			}
+			RowContent& firstContent = playground[0];
+			Assert(firstContent.Type == RowContentType::BorderSpacer);
 
 			if constexpr (IsDebug())
 			{
-				LogFormat("\n\n-> {}", floatingWidth);
-			}
-			firstSpacer.PropagateSpaces(floatingWidth, testCurrentPlayground);
+				String conditionsDebugStr;
+				for (SpringCondition condition : Input_ConditionRecords)
+				{
+					conditionsDebugStr += SpringConditionToChar(condition);
+				}
 
-			return validPlaygrounds;
+				String groupsDebugStr;
+				bool first = true;
+				for (u32 groupSize : Input_GroupSizes)
+				{
+					if (!first)
+					{
+						groupsDebugStr += ',';
+					}
+					first = false;
+					groupsDebugStr += std::to_string(groupSize);
+				}
+
+				LogFormat("\n{} {} -> {} ", conditionsDebugStr, groupsDebugStr, floatingWidth);
+			}
+			const u64 numValidArrangements = firstContent.PropagateSpacesAndFindValidArrangements(Input_ConditionRecords, 0, floatingWidth);
+
+			return numValidArrangements;
 		}
 	};
 
@@ -205,15 +314,24 @@ export namespace aoc
 			: ID(id)
 		{
 			Future = Promise.get_future();
-			LogFormat("Thread {} starting", ID);
+			if constexpr (IsDebug())
+			{
+				LogFormat("Thread {} starting", ID);
+			}
 			Thread = std::thread(std::forward<decltype(func)>(func), std::move(Promise)); // promise should ideally be moved
 		}
 
 		void JoinThread()
 		{
-			LogFormat("Thread {} waiting to finish", ID);
+			if constexpr (IsDebug())
+			{
+				LogFormat("Thread {} waiting to finish", ID);
+			}
 			Thread.join();
-			LogFormat("Thread {} joined", ID);
+			if constexpr (IsDebug())
+			{
+				LogFormat("Thread {} joined", ID);
+			}
 		}
 
 		u64 GetResult()
@@ -242,7 +360,10 @@ export namespace aoc
 			{
 				const u64 arrangementsCount = row.BruteforceArrangements();
 
-				LogFormat("Thread {} result: {}", workerID, arrangementsCount);
+				if constexpr (IsDebug() || false)
+				{
+					LogFormat("Thread {} result: {}", workerID, arrangementsCount);
+				}
 				promise.set_value(arrangementsCount);
 			});
 
@@ -279,13 +400,8 @@ export namespace aoc
 			SpringRow row;
 			for (char c : formatStrings[0])
 			{
-				switch (c)
-				{
-					case '.': row.Input_ConditionRecords.push_back(SpringCondition::Operational); break;
-					case '#': row.Input_ConditionRecords.push_back(SpringCondition::Damaged); break;
-					case '?': row.Input_ConditionRecords.push_back(SpringCondition::Unknown); break;
-					default: Assert(false); break;
-				}
+				const SpringCondition condition = CharToSpringCondition(c);
+				row.Input_ConditionRecords.push_back(condition);
 			}
 
 			Vector<String> contiguousGroupStrings = Split(formatStrings[1], ",");
@@ -319,6 +435,61 @@ export namespace aoc
 
 	export String ExecutePart2()
 	{
-		return "";
+		auto input = OpenInput("day12.txt");
+
+		Vector<SpringRow> springRows;
+
+		String line;
+		while (std::getline(input, line))
+		{
+			Vector<String> formatStrings = Split(line, " ");
+			Assert(formatStrings.size() == 2);
+
+			SpringRow row;
+
+			Vector<String> contiguousGroupStrings = Split(formatStrings[1], ",");
+
+			bool first = true;
+			for (u32 unfoldIdx = 0; unfoldIdx < 5; unfoldIdx++)
+			{
+				if (!first)
+				{
+					row.Input_ConditionRecords.push_back(SpringCondition::Unknown);
+				}
+				first = false;
+
+				for (char c : formatStrings[0])
+				{
+					const SpringCondition condition = CharToSpringCondition(c);
+					row.Input_ConditionRecords.push_back(condition);
+				}
+
+				for (const String& str : contiguousGroupStrings)
+				{
+					u32 groupSize = std::stoi(str);
+					row.Input_GroupSizes.push_back(groupSize);
+				}
+			}
+
+			springRows.push_back(std::move(row));
+		}
+
+		u64 result = 0;
+
+		constexpr bool multithread = false;
+
+		if constexpr (multithread)
+		{
+			result = BruteforceArrangementsMT(springRows);
+		}
+		else
+		{
+			for (SpringRow& row : springRows)
+			{
+				result += row.BruteforceArrangements();
+			}
+		}
+
+		return std::to_string(result);
 	}
 }

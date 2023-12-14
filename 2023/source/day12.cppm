@@ -65,9 +65,10 @@ export namespace aoc
 
 			constexpr bool operator<(const FindSubArrangementsCacheEntry& rhs)
 			{
-				if (CurrentRowPos != rhs.CurrentRowPos)
+				if (auto ordering = CurrentRowPos <=> rhs.CurrentRowPos;
+					ordering != 0)
 				{
-					return CurrentRowPos < rhs.CurrentRowPos;
+					return ordering < 0;
 				}
 				return RemainingFloatingSpaces < rhs.RemainingFloatingSpaces;
 			}

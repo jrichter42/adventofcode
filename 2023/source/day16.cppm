@@ -283,6 +283,45 @@ export namespace aoc
 
 	export String ExecutePart2()
 	{
-		return "";
+		auto input = OpenInput("day16.txt");
+
+		Map map;
+
+		String line;
+		while (std::getline(input, line))
+		{
+			auto& row = map.Tiles.emplace_back();
+			for (const char c : line)
+			{
+				const TileContent content = CharToTileContent(c);
+				row.push_back(content);
+			}
+		}
+
+		u32 result = 0;
+
+		auto execute = [&](u32 x, u32 y, Direction dir) {
+			Map mapCopy = map;
+			mapCopy.PropagateBeam(Vec2I(x, y), dir);
+			result = std::max(result, mapCopy.GetEnergizedCount());
+		};
+
+		{
+			u32 y = 0;
+			for (u32 x = 0; x < map.Width(); ++x) { execute(x, y, Direction::Down); }
+
+			y = map.Height() - 1;
+			for (u32 x = 0; x < map.Width(); ++x) { execute(x, y, Direction::Up); }
+		}
+
+		{
+			u32 x = 0;
+			for (u32 y = 0; y < map.Height(); ++y) { execute(x, y, Direction::Right); }
+
+			x = map.Width() - 1;
+			for (u32 y = 0; y < map.Height(); ++y) { execute(x, y, Direction::Left); }
+		}
+
+		return std::to_string(result);
 	}
 }

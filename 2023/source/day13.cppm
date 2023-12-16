@@ -23,10 +23,9 @@ export namespace aoc
 			Assert(Content[0].empty() == false);
 			Width = NarrowSizeT(Content[0].size());
 
-			using vec2 = std::pair<u32, u32>; // should finally fix this
 			struct SmudgeInfo
 			{
-				SmudgeInfo(const vec2& posBehind, const vec2& posAhead, u32 mirrorPos, bool horizontal)
+				SmudgeInfo(const Vec2I& posBehind, const Vec2I& posAhead, u32 mirrorPos, bool horizontal)
 					: PosBehind(posBehind)
 					, PosAhead(posAhead)
 				{
@@ -40,8 +39,8 @@ export namespace aoc
 					}
 				}
 
-				vec2 PosBehind;
-				vec2 PosAhead;
+				Vec2I PosBehind;
+				Vec2I PosAhead;
 				u32 HorizontalMirror = u32_MAX;
 				u32 VerticalMirror = u32_MAX;
 
@@ -75,7 +74,7 @@ export namespace aoc
 						{
 							if (!cleaningNeeded)
 							{
-								smudgePositions.emplace_back(std::make_pair(x, yBehind), std::make_pair(x, yAhead), potentialYMirror, false);
+								smudgePositions.emplace_back(Vec2I(x, yBehind), Vec2I(x, yAhead), potentialYMirror, false);
 								cleaningNeeded = true;
 								continue;
 							}
@@ -122,7 +121,7 @@ export namespace aoc
 						{
 							if (!cleaningNeeded)
 							{
-								smudgePositions.emplace_back(std::make_pair(xBehind, y), std::make_pair(xAhead, y), potentialXMirror, true);
+								smudgePositions.emplace_back(Vec2I(xBehind, y), Vec2I(xAhead, y), potentialXMirror, true);
 								cleaningNeeded = true;
 								continue;
 							}

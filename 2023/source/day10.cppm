@@ -137,49 +137,19 @@ export namespace aoc
 		return false;
 	}
 
-	struct vec2
-	{
-		vec2() = default;
-
-		vec2(s32 x, s32 y)
-			: X(x)
-			, Y(y)
-		{}
-
-		bool operator==(const vec2& other) const
-		{
-			return X == other.X && Y == other.Y;
-		}
-
-		bool operator!=(const vec2& other) const
-		{
-			return !operator==(other);
-		}
-
-		vec2 operator+(const vec2& other) const
-		{
-			return vec2(
-				X + other.X,
-				Y + other.Y);
-		}
-
-		s32 X = 0;
-		s32 Y = 0;
-	};
-
-	vec2 DirectionToVec2(Direction dir)
+	Vec2I DirectionToVec2(Direction dir)
 	{
 		switch (dir)
 		{
-		case Direction::North: return vec2(0, -1);
-		case Direction::East: return vec2(1, 0);
-		case Direction::West: return vec2(-1, 0);
-		case Direction::South: return vec2(0, 1);
+		case Direction::North: return Vec2I(0, -1);
+		case Direction::East: return Vec2I(1, 0);
+		case Direction::West: return Vec2I(-1, 0);
+		case Direction::South: return Vec2I(0, 1);
 		}
-		return vec2();
+		return Vec2I();
 	}
 
-	Direction Vec2ToDirection(const vec2& vec)
+	Direction Vec2ToDirection(const Vec2I& vec)
 	{
 		if (vec.X == 0)
 		{
@@ -211,7 +181,7 @@ export namespace aoc
 	{
 		using Base = Array<Array<CellContent, SizeX>, SizeY>;
 
-		CellContent operator[](const vec2& position) const
+		CellContent operator[](const Vec2I& position) const
 		{
 			// underlying is inverted, reasoning: see in this file below
 			const auto& row = Base::operator[](position.Y);
@@ -231,11 +201,11 @@ export namespace aoc
 		static constexpr u32 s_GlobalHorizontalLimit = s_GlobalHorizontalSize - 1;
 		static constexpr u32 s_GlobalVerticalLimit = s_GlobalVerticalSize - 1;
 
-		DiscoveredCell(const GlobalMap& globalMap, vec2 globalPos)
+		DiscoveredCell(const GlobalMap& globalMap, Vec2I globalPos)
 			: GlobalMapRef(const_cast<GlobalMap&>(globalMap))
 			, Position(globalPos)
 		{
-			Content = Peek(vec2());
+			Content = Peek(Vec2I());
 			Assert(Content != CellContent::Invalid);
 		}
 
@@ -267,21 +237,21 @@ export namespace aoc
 			return result;
 		}
 
-		vec2 Position;
+		Vec2I Position;
 		CellContent Content = CellContent::Invalid;
-		vec2 DiscoveredFromLocalPosition;
+		Vec2I DiscoveredFromLocalPosition;
 		u32 StepsTaken = 0;
 	protected:
 		GlobalMap& GlobalMapRef; // should be const but c++
 	public:
 
-		CellContent Peek(const vec2& localPos, bool localOnly = false) const
+		CellContent Peek(const Vec2I& localPos, bool localOnly = false) const
 		{
-			const vec2 localLimitBottom = vec2(
+			const Vec2I localLimitBottom = Vec2I(
 				Position.X == 0 ? 0 : Position.X - 1,
 				Position.Y == 0 ? 0 : Position.Y - 1);
 
-			const vec2 localLimitTop = vec2(
+			const Vec2I localLimitTop = Vec2I(
 				Position.X == s_GlobalHorizontalLimit ? s_GlobalHorizontalLimit : Position.X + 1,
 				Position.Y == s_GlobalVerticalLimit ? s_GlobalVerticalLimit : Position.Y + 1);
 
@@ -295,20 +265,17 @@ export namespace aoc
 				return CellContent::Invalid;
 			}
 
-			const vec2 globalPos = vec2(
-				Position.X + localPos.X,
-				Position.Y + localPos.Y);
+			const Vec2I globalPos = Position + localPos;
 
 			return GlobalMapRef[globalPos];
 		}
 
-		DiscoveredCell Discover(const vec2& localPos) const
+		DiscoveredCell Discover(const Vec2I& localPos) const
 		{
-			const vec2 globalPos(Position.X + localPos.X, Position.Y + localPos.Y);
+			const Vec2I globalPos = Position + localPos;
 
 			DiscoveredCell result(GlobalMapRef, globalPos);
-			result.DiscoveredFromLocalPosition.X = -localPos.X;
-			result.DiscoveredFromLocalPosition.Y = -localPos.Y;
+			result.DiscoveredFromLocalPosition = -localPos;
 			result.StepsTaken = StepsTaken + 1;
 
 			return result;
@@ -324,7 +291,7 @@ export namespace aoc
 					return;
 				}
 
-				const vec2 localPos = DirectionToVec2(direction);
+				const Vec2I localPos = DirectionToVec2(direction);
 				const CellContent targetContent = Peek(localPos);
 				const Direction dirTargetToSelf = OppositeDirection(direction);
 				if (HasPipeConnection(targetContent, dirTargetToSelf))
@@ -343,8 +310,8 @@ export namespace aoc
 
 		void DiscoverNeighbors(Vector<DiscoveredCell>& newDiscoveries) const
 		{
-			Vector<vec2> connectedNeighbors;
-			ForEachConnectedNeighbor([&](const Direction direction, const vec2& localPos, const CellContent cellContent) {
+			Vector<Vec2I> connectedNeighbors;
+			ForEachConnectedNeighbor([&](const Direction direction, const Vec2I& localPos, const CellContent cellContent) {
 				if (cellContent == CellContent::Invalid
 					|| localPos == DiscoveredFromLocalPosition) // avoid going back
 				{
@@ -356,7 +323,7 @@ export namespace aoc
 			});
 		}
 
-		u32 DetectLoop(Vector<DiscoveredCell>& discoveredCells, Vector<vec2>& outLoopPath) const
+		u32 DetectLoop(Vector<DiscoveredCell>& discoveredCells, Vector<Vec2I>& outLoopPath) const
 		{
 			auto it = std::find(discoveredCells.begin(), discoveredCells.end(), *this);
 			if (it != discoveredCells.end())
@@ -367,11 +334,9 @@ export namespace aoc
 				// part 2 hack: backtrack from newDiscovery
 				{
 					auto stepBack = [&](const DiscoveredCell& cell) -> const DiscoveredCell* {
-						const vec2& previousPos = vec2( // I should finally implement stupid vec2 arithmetic
-							cell.Position.X + cell.DiscoveredFromLocalPosition.X,
-							cell.Position.Y + cell.DiscoveredFromLocalPosition.Y);
+						const Vec2I& previousPos = cell.Position + cell.DiscoveredFromLocalPosition;
 
-						if (cell.DiscoveredFromLocalPosition == vec2())
+						if (cell.DiscoveredFromLocalPosition == Vec2I())
 						{
 							// start reached
 							return nullptr;
@@ -390,9 +355,9 @@ export namespace aoc
 						return nullptr;
 					};
 
-					Vector<vec2> rollBackToStart;
+					Vector<Vec2I> rollBackToStart;
 
-					auto rollBackFromAndWrite = [&](const DiscoveredCell& from, Vector<vec2>& outPath) {
+					auto rollBackFromAndWrite = [&](const DiscoveredCell& from, Vector<Vec2I>& outPath) {
 						const DiscoveredCell* previousStep = stepBack(from);
 						while (previousStep != nullptr)
 						{
@@ -421,7 +386,7 @@ export namespace aoc
 			return 0;
 		}
 
-		static u32 TryDiscoverLoop(const DiscoveredCell& start, Vector<vec2>& outLoopPath)
+		static u32 TryDiscoverLoop(const DiscoveredCell& start, Vector<Vec2I>& outLoopPath)
 		{
 			Vector<DiscoveredCell> log;
 			Vector<DiscoveredCell> currentHeads;
@@ -461,7 +426,7 @@ export namespace aoc
 			}
 		}
 
-		u32 DiscoverLoopFromHere(Vector<vec2>& outLoopPath)
+		u32 DiscoverLoopFromHere(Vector<Vec2I>& outLoopPath)
 		{
 			return TryDiscoverLoop(*this, outLoopPath);
 		}
@@ -474,7 +439,7 @@ export namespace aoc
 		DiscoveredCell::GlobalMap map;
 		DiscoveredCell::GlobalMap::Base& mapUnderlyingData = map.UnderlyingData();
 
-		Vector<vec2> startPositions;
+		Vector<Vec2I> startPositions;
 
 		u32 verticalIndex = 0;
 		String line;
@@ -515,7 +480,7 @@ export namespace aoc
 		Assert(startPositions.size() == 1);
 
 		DiscoveredCell navigator(map, startPositions[0]);
-		Vector<vec2> loopPath; // I'm too lazy for nullptr checks. Greetings from part 2.
+		Vector<Vec2I> loopPath; // I'm too lazy for nullptr checks. Greetings from part 2.
 		u32 startToStartLoopStepCount = navigator.DiscoverLoopFromHere(loopPath);
 		Assert(startToStartLoopStepCount % 2 == 0);
 		u32 loopFurthestDistanceSteps = startToStartLoopStepCount / 2;
@@ -530,7 +495,7 @@ export namespace aoc
 		DiscoveredCell::GlobalMap map;
 		DiscoveredCell::GlobalMap::Base& mapUnderlyingData = map.UnderlyingData();
 
-		Vector<vec2> startPositions;
+		Vector<Vec2I> startPositions;
 
 		u32 verticalIndex = 0;
 		String line;
@@ -570,7 +535,7 @@ export namespace aoc
 
 		Assert(startPositions.size() == 1);
 
-		Vector<vec2> loopPath;
+		Vector<Vec2I> loopPath;
 		DiscoveredCell navigator(map, startPositions[0]);
 		u32 startToStartLoopStepCount = navigator.DiscoverLoopFromHere(loopPath);
 		Assert(startToStartLoopStepCount > 0);
@@ -584,33 +549,33 @@ export namespace aoc
 		}
 
 		// write loop so we can observe it when writing insides
-		for (const vec2& pos : loopPath)
+		for (const Vec2I& pos : loopPath)
 		{
 			contentTypeMap[pos.X][pos.Y] = ContentType::Loop;
 		}
 
-		Vector<vec2> writtenInsidePositions;
+		Vector<Vec2I> writtenInsidePositions;
 		constexpr Rotation insideDirRot = Rotation::Right; // two options, no I will not calculate this.
 		for (u32 loopElemIdx = 0; loopElemIdx < loopPath.size() - 1; loopElemIdx++)
 		{
-			const vec2& pos = loopPath[loopElemIdx];
+			const Vec2I& pos = loopPath[loopElemIdx];
 			CellContent content = map[pos];
 			Vector<Direction> contentConnections = ContentConnections(content);
 
-			const vec2& nextPos = loopPath[loopElemIdx + 1];
+			const Vec2I& nextPos = loopPath[loopElemIdx + 1];
 			CellContent nextContent = map[nextPos];
 			Vector<Direction> nextContentConnections = ContentConnections(nextContent);
 
-			vec2 directionVector(nextPos.X - pos.X, nextPos.Y - pos.Y);
+			Vec2I directionVector = nextPos - pos;;
 
 			Direction loopDir = Vec2ToDirection(directionVector);
 			Assert(loopDir != Direction::Invalid);
 
 			Direction insideDir = Rotate(loopDir, insideDirRot);
 			Assert(insideDir != Direction::Invalid);
-			vec2 insideDirVec = DirectionToVec2(insideDir);
+			Vec2I insideDirVec = DirectionToVec2(insideDir);
 
-			auto tryWrite = [&](const vec2& pos) {
+			auto tryWrite = [&](const Vec2I& pos) {
 				ContentType& type = contentTypeMap[pos.X][pos.Y];
 				if (type == ContentType::Loop
 					|| type == ContentType::InsideLoop)
@@ -652,7 +617,7 @@ export namespace aoc
 					// . | .
 					if (Contains(nextContentConnections, loopDir) == false)
 					{
-						vec2 loopDirVec = DirectionToVec2(loopDir);
+						Vec2I loopDirVec = DirectionToVec2(loopDir);
 						tryWrite(nextPos + insideDirVec + loopDirVec);
 					}
 				}
@@ -667,7 +632,7 @@ export namespace aoc
 
 		// flood fill from all InsideLoop until Loop or InsideLoop
 
-		auto tryFill = [&](u32 x, u32 y, Vector<vec2>& log) -> bool {
+		auto tryFill = [&](u32 x, u32 y, Vector<Vec2I>& log) -> bool {
 			if (x > DiscoveredCell::s_GlobalHorizontalLimit
 				|| y > DiscoveredCell::s_GlobalVerticalLimit)
 			{
@@ -683,19 +648,19 @@ export namespace aoc
 
 			type = ContentType::InsideLoop;
 
-			const vec2 pos = vec2(x, y);
+			const Vec2I pos = Vec2I(x, y);
 			log.push_back(pos);
 			writtenInsidePositions.push_back(pos);
 			return true;
 		};
 
-		Vector<vec2> floodFillCurrentHeads = writtenInsidePositions;
-		Vector<vec2> floodFillNextHeads;
+		Vector<Vec2I> floodFillCurrentHeads = writtenInsidePositions;
+		Vector<Vec2I> floodFillNextHeads;
 		while (floodFillCurrentHeads.empty() == false)
 		{
 			Assert(floodFillCurrentHeads.size() < (DiscoveredCell::s_GlobalHorizontalSize* DiscoveredCell::s_GlobalVerticalSize));
 
-			for (const vec2& currentHead : floodFillCurrentHeads)
+			for (const Vec2I& currentHead : floodFillCurrentHeads)
 			{
 				if (currentHead.X > 0)
 				{

@@ -186,7 +186,7 @@ export namespace aoc
 			Log("");
 		}
 
-		u32 FindLowestHeatLossFromCruciblePath()
+		u32 FindLowestHeatLossFromCruciblePath(bool ultra = false)
 		{
 			// optimize neighbor iteration
 			const std::pair<Direction, Vec2I> neighborOffsets[4] = {
@@ -240,7 +240,7 @@ export namespace aoc
 
 			u32 previousHeatCost = 0;
 			// A* but it only closes according to a heuristic of both heat and stepsInSameDir, not by visited
-			while(openList.empty() == false)
+			while (openList.empty() == false)
 			{
 				// lowest path costs
 				Block::Link currentLink = openList.top();
@@ -257,7 +257,7 @@ export namespace aoc
 				//if constexpr (IsDebug()) { LogFormat("{},{}    {}    {}", currentBlock.Position.X, currentBlock.Position.Y, s32(currentLink.HeatCost) - s32(previousHeatCost), currentLink.HeatCost); }
 				previousHeatCost = currentLink.HeatCost;
 
-				if (currentBlock.Position == Vec2I(12, 10))
+				if (currentBlock.Position == Vec2I(10, 0))
 				{
 					DebugOutputCurrentBestPathToEnd();
 					//__debugbreak();
@@ -268,7 +268,7 @@ export namespace aoc
 					const auto& neighborOffset = neighborOffsets[i];
 					const Direction neighborDir = neighborOffset.first;
 
-					if (neighborDir == Opposite(currentLink.Dir))
+					if (neighborDir == Opposite(currentLink.Dir) && currentLink.Dir != Direction::Invalid)
 					{
 						// can't reverse (direction)
 						continue;
@@ -284,7 +284,7 @@ export namespace aoc
 					}
 
 					const u8 sameDirCost = [&]() -> u8 {
-						if (neighborDir == currentLink.Dir)
+						if (neighborDir == currentLink.Dir || currentLink.Dir == Direction::Invalid)
 						{
 							// moving in same direction
 							return currentLink.SameDirCost + 1;
@@ -292,7 +292,24 @@ export namespace aoc
 						return 1;
 					}();
 
-					if (sameDirCost > 3)
+					if (ultra)
+					{
+						if (sameDirCost > 10)
+						{
+							continue;
+						}
+
+						if (sameDirCost < 4)
+						{
+							if (neighborDir != currentLink.Dir
+								&& currentLink.Dir != Direction::Invalid
+								&& currentLink.SameDirCost < 4) // move at least 4 before turning
+							{
+								continue;
+							}
+						}
+					}
+					else if (sameDirCost > 3)
 					{
 						// dont take more than 3 steps
 						continue;
@@ -339,17 +356,26 @@ export namespace aoc
 							|| (compareHeatCost == 0 && compareSameDirCost < 0)
 							|| (compareSameDirCost == 0 && compareHeatCost < 0))
 						{
+							//alreadyHasBetterLink = true;
+							//continue;
+						}
+
+						if (link == newLinkToNeighbor)
+						{
 							alreadyHasBetterLink = true;
-							continue;
 						}
 
 						if ((compareHeatCost > 0 && compareSameDirCost > 0)
 							|| (compareHeatCost == 0 && compareSameDirCost > 0)
 							|| (compareSameDirCost == 0 && compareHeatCost > 0))
 						{
-							// remove worse link along this path
-							linksToRemove.push_back(&link);
-							link.Closed = true;
+							if (!ultra
+								|| link.SameDirCost < 4)
+							{
+								// remove worse link along this path
+								//linksToRemove.push_back(&link);
+								//link.Closed = true;
+							}
 						}
 					}
 
@@ -497,6 +523,27 @@ export namespace aoc
 
 	export String ExecutePart2()
 	{
-		return "";
+		auto input = OpenInput("day17.txt");
+
+		Map map;
+
+		u32 y = 0;
+		String line;
+		while (std::getline(input, line))
+		{
+			Vector<Block>& row = map.Blocks.emplace_back();
+			for (u32 x = 0; x < line.size(); ++x)
+			{
+				const char c = line[x];
+				u8 heatLoss = static_cast<u8>(c - '0');
+				Assert(heatLoss < 10);
+				row.emplace_back(Vec2I(x, y), heatLoss);
+			}
+			++y;
+		}
+
+		u32 result = map.FindLowestHeatLossFromCruciblePath(true);
+
+		return std::to_string(result);
 	}
 }

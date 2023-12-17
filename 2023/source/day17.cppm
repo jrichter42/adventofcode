@@ -34,9 +34,8 @@ export namespace aoc
 			u32 HeatCost = 0;
 			u8 SameDirCost = 0;
 			Block* BlockFrom = nullptr;
-			bool Closed = false;
-			bool VerifiedIn2ndPass = false;
-			Vector<std::pair<Vec2I, Direction>> Path;
+
+			Vector<std::pair<Vec2I, Direction>> DebugPath;
 
 			constexpr bool operator==(const Link& other) const
 			{
@@ -61,11 +60,7 @@ export namespace aoc
 					return heatCostOrdering;
 				}
 
-				const auto sameDirCostOrdering = SameDirCost <=> rhs.SameDirCost;
-				//if (sameDirCostOrdering != 0)
-				{
-					return sameDirCostOrdering;
-				}
+				return SameDirCost <=> rhs.SameDirCost;
 			}
 		};
 
@@ -145,7 +140,7 @@ export namespace aoc
 		{
 			if constexpr (IsDebug() == false)
 			{
-				//return;
+				return;
 			}
 
 			Map copy = *this;
@@ -157,7 +152,7 @@ export namespace aoc
 			if (minHeatLink != endBlock->LinksIn.end())
 			{
 				Block::Link link = *minHeatLink;
-				for (auto pathIt = link.Path.rbegin(); pathIt < link.Path.rend(); ++pathIt)
+				for (auto pathIt = link.DebugPath.rbegin(); pathIt < link.DebugPath.rend(); ++pathIt)
 				{
 					const Vec2I& pos = pathIt->first;
 					const Direction dir = pathIt->second;
@@ -179,7 +174,6 @@ export namespace aoc
 						case Direction::Down: rowStr.push_back('v'); continue;
 					}
 					rowStr.push_back('0' + block.HeatLoss);
-					//rowStr.push_back('.');
 				}
 				Log(rowStr);
 			}
@@ -238,7 +232,6 @@ export namespace aoc
 
 			openList.push(startLink);
 
-			u32 previousHeatCost = 0;
 			// A* but it only closes according to a heuristic of both heat and stepsInSameDir, not by visited
 			while (openList.empty() == false)
 			{
@@ -246,29 +239,16 @@ export namespace aoc
 				Block::Link currentLink = openList.top();
 				openList.pop();
 
-				if (currentLink.Closed)
-				{
-					continue;
-				}
-
 				Assert(currentLink.BlockTo != nullptr);
 				Block& currentBlock = *(currentLink.BlockTo);
-
-				//if constexpr (IsDebug()) { LogFormat("{},{}    {}    {}", currentBlock.Position.X, currentBlock.Position.Y, s32(currentLink.HeatCost) - s32(previousHeatCost), currentLink.HeatCost); }
-				previousHeatCost = currentLink.HeatCost;
-
-				if (currentBlock.Position == Vec2I(10, 0))
-				{
-					DebugOutputCurrentBestPathToEnd();
-					//__debugbreak();
-				}
 
 				for (u32 i = 0; i < 4; i++) //Go through all neighbours
 				{
 					const auto& neighborOffset = neighborOffsets[i];
 					const Direction neighborDir = neighborOffset.first;
 
-					if (neighborDir == Opposite(currentLink.Dir) && currentLink.Dir != Direction::Invalid)
+					if (neighborDir == Opposite(currentLink.Dir)
+						&& currentLink.Dir != Direction::Invalid)
 					{
 						// can't reverse (direction)
 						continue;
@@ -283,30 +263,25 @@ export namespace aoc
 						continue;
 					}
 
-					const u8 sameDirCost = [&]() -> u8 {
-						if (neighborDir == currentLink.Dir || currentLink.Dir == Direction::Invalid)
-						{
-							// moving in same direction
-							return currentLink.SameDirCost + 1;
-						}
-						return 1;
-					}();
+					u8 sameDirCost = 1;
+					if (neighborDir == currentLink.Dir || currentLink.Dir == Direction::Invalid)
+					{
+						// moving in same direction
+						sameDirCost = currentLink.SameDirCost + 1;
+					}
 
 					if (ultra)
 					{
-						if (sameDirCost > 10)
+						if (sameDirCost > 10
+							|| (
+								sameDirCost < 4
+								&& currentLink.SameDirCost < 4 // moved at least 4 before turning
+								&& neighborDir != currentLink.Dir
+								&& currentLink.Dir != Direction::Invalid
+								)
+							)
 						{
 							continue;
-						}
-
-						if (sameDirCost < 4)
-						{
-							if (neighborDir != currentLink.Dir
-								&& currentLink.Dir != Direction::Invalid
-								&& currentLink.SameDirCost < 4) // move at least 4 before turning
-							{
-								continue;
-							}
 						}
 					}
 					else if (sameDirCost > 3)
@@ -325,19 +300,13 @@ export namespace aoc
 						.SameDirCost = sameDirCost,
 						.BlockFrom = &currentBlock
 					};
-					newLinkToNeighbor.Path = currentLink.Path;
-					newLinkToNeighbor.Path.emplace_back(neighborPos, neighborDir);
 
-					bool alreadyHasBetterLink = false;
-					Vector<const Block::Link*> linksToRemove;
+					newLinkToNeighbor.DebugPath = currentLink.DebugPath;
+					newLinkToNeighbor.DebugPath.emplace_back(neighborPos, neighborDir);
+
+					bool linkAlreadyExists = false;
 					for (Block::Link& link : neighborBlock.LinksIn)
 					{
-						if (link.Closed)
-						{
-							linksToRemove.push_back(&link);
-							continue;
-						}
-
 						if (link.Dir != newLinkToNeighbor.Dir)
 						{
 							if constexpr (IsDebug())
@@ -345,49 +314,18 @@ export namespace aoc
 								Assert(link.BlockTo == newLinkToNeighbor.BlockTo);
 								Assert(link.BlockFrom != newLinkToNeighbor.BlockFrom || link.BlockFrom == nullptr);
 							}
-							// unrelated link, keep going and potentially add new link afterwards
+
+							// unrelated link
 							continue;
-						}
-
-						const auto compareHeatCost = link.HeatCost <=> newLinkToNeighbor.HeatCost;
-						const auto compareSameDirCost = link.SameDirCost <=> newLinkToNeighbor.SameDirCost;
-
-						if ((compareHeatCost <= 0 && compareSameDirCost <= 0)
-							|| (compareHeatCost == 0 && compareSameDirCost < 0)
-							|| (compareSameDirCost == 0 && compareHeatCost < 0))
-						{
-							//alreadyHasBetterLink = true;
-							//continue;
 						}
 
 						if (link == newLinkToNeighbor)
 						{
-							alreadyHasBetterLink = true;
-						}
-
-						if ((compareHeatCost > 0 && compareSameDirCost > 0)
-							|| (compareHeatCost == 0 && compareSameDirCost > 0)
-							|| (compareSameDirCost == 0 && compareHeatCost > 0))
-						{
-							if (!ultra
-								|| link.SameDirCost < 4)
-							{
-								// remove worse link along this path
-								//linksToRemove.push_back(&link);
-								//link.Closed = true;
-							}
+							linkAlreadyExists = true;
 						}
 					}
 
-					for (const Block::Link* link : linksToRemove)
-					{
-						auto& from = link->BlockFrom->LinksOut;
-						auto& to = link->BlockTo->LinksIn;
-						from.erase(std::ranges::remove(from, *link).begin(), from.end());
-						to.erase(std::ranges::remove(to, *link).begin(), to.end());
-					}
-
-					if (alreadyHasBetterLink)
+					if (linkAlreadyExists)
 					{
 						continue;
 					}
@@ -395,100 +333,16 @@ export namespace aoc
 					neighborBlock.LinksIn.push_back(newLinkToNeighbor);
 					currentBlock.LinksOut.push_back(newLinkToNeighbor);
 					openList.push(newLinkToNeighbor);
-
-					if (IsDebug() /* && neighborBlock == endBlock*/)
-					{
-						//LogFormat("{}", openList.size());
-						//DebugOutputCurrentBestPathToEnd();
-					}
 				}
 			}
 
 			DebugOutputCurrentBestPathToEnd();
 
-			// if A* would fail due to dir restrictions, do second pass: find optimal path
 			auto minHeatLink = std::ranges::min_element(endBlock.LinksIn, [](const Block::Link& lhs, const Block::Link& rhs) { return lhs.HeatCost < rhs.HeatCost; });
-			Assert(minHeatLink != endBlock.LinksIn.end());
-			return minHeatLink->HeatCost;
-
-			// 2nd pass
-
-			/*struct
+			if (minHeatLink != endBlock.LinksIn.end())
 			{
-				bool operator()(const Block::Link& lhs, const Block::Link& rhs) const
-				{
-					if (lhs.HeatCost != rhs.HeatCost)
-					{
-						return lhs.HeatCost > rhs.HeatCost;
-					}
-
-					// prefer less visited blocks, but dont trash first discovery being optimal heat cost
-					if (lhs.BlockTo->LinksIn.size() != rhs.BlockTo->LinksIn.size())
-					{
-						return lhs.BlockTo->LinksIn.size() > rhs.BlockTo->LinksIn.size();
-					}
-
-					//if (lhs.SameDirCost < rhs.SameDirCost)
-					{
-						return lhs.SameDirCost > rhs.SameDirCost;
-					}
-				}
-			} compareHeuristic2ndPass;
-
-			std::priority_queue<Block::Link, Vector<Block::Link>, decltype(compareHeuristic2ndPass)> openList2ndPass(compareHeuristic2ndPass);
-
-			// 2nd pass: determine best actually possible path, we potentially violated dir cost rule on merging
-			startLink.VerifiedIn2ndPass = true;
-			openList2ndPass.push(startLink);
-			while(openList2ndPass.empty() == false)
-			{
-				// lowest path costs
-				Block::Link currentLink = openList2ndPass.top();
-				openList2ndPass.pop();
-
-				if (currentLink.Closed)
-				{
-					continue;
-				}
-
-				Assert(currentLink.BlockTo != nullptr);
-				Block& currentBlock = *currentLink.BlockTo;
-
-				if (currentBlock == endBlock)
-				{
-					// success
-					DebugOutputCurrentBestPathToEnd();
-					return currentLink.HeatCost;
-				}
-
-				auto minHeatLinkToCurrentBlock = std::ranges::min_element(currentBlock.LinksIn, [](const Block::Link& lhs, const Block::Link& rhs) {
-					if (lhs.VerifiedIn2ndPass == false
-						|| lhs.Closed == true)
-					{
-						return false;
-					}
-					return lhs.HeatCost < rhs.HeatCost;
-				});
-
-				Assert(minHeatLinkToCurrentBlock != currentBlock.LinksIn.end());
-
-				for (Block::Link& linkOut : currentBlock.LinksOut)
-				{
-					if (linkOut.Closed || linkOut.VerifiedIn2ndPass)
-					{
-						continue;
-					}
-
-					if (linkOut.SameDirCost + minHeatLinkToCurrentBlock->SameDirCost > 3)
-					{
-						// too expensive, dont verify from here
-						continue;
-					}
-
-					linkOut.VerifiedIn2ndPass = true;
-					openList2ndPass.push(linkOut);
-				}
-			}*/
+				return minHeatLink->HeatCost;
+			}
 
 			// end not found
 			return 0;

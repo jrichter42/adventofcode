@@ -216,7 +216,7 @@ export namespace aoc
 
 					Tile& tile = Tiles[currentPos.Y][currentPos.X];
 
-					auto tileBeamDirIt = std::find(tile.IncomingBeamDirections.begin(), tile.IncomingBeamDirections.end(), currentDir);
+					auto tileBeamDirIt = std::ranges::find(tile.IncomingBeamDirections, currentDir);
 					if (tileBeamDirIt != tile.IncomingBeamDirections.end())
 					{
 						// Loop found

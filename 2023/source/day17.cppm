@@ -215,16 +215,7 @@ export namespace aoc
 						return lhs.HeatCost > rhs.HeatCost;
 					}
 
-					// prefer less visited blocks
-					if (lhs.BlockTo->LinksIn.size() != rhs.BlockTo->LinksIn.size())
-					{
-						return lhs.BlockTo->LinksIn.size() > rhs.BlockTo->LinksIn.size();
-					}
-
-					//if (lhs.SameDirCost < rhs.SameDirCost)
-					{
-						return lhs.SameDirCost > rhs.SameDirCost;
-					}
+					return lhs.SameDirCost > rhs.SameDirCost;
 				}
 			} compareHeuristic;
 

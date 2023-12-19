@@ -86,7 +86,11 @@ export namespace aoc
 
 		void Dig(Direction dir, u64 meters)
 		{
-			LogFormat("Digging {} meters", meters);
+			if constexpr (IsDebug())
+			{
+				LogFormat("Digging {} meters", meters);
+			}
+
 			for (u64 i = 0; i < meters; ++i)
 			{
 				DiggerPos += DirToVec2(dir);
@@ -95,7 +99,7 @@ export namespace aoc
 			}
 
 			std::sort(DugOutVolumes.begin(), DugOutVolumes.end());
-			DugOutVolumes.erase(std::unique(DugOutVolumes.begin(), DugOutVolumes.end() ), DugOutVolumes.end());
+			DugOutVolumes.erase(std::unique(DugOutVolumes.begin(), DugOutVolumes.end()), DugOutVolumes.end());
 		}
 
 		u64 DigInsideArea()
@@ -110,13 +114,16 @@ export namespace aoc
 
 			std::ranges::sort(dugOutPositions);
 
-			LogFormat("Dug out {}. Starting digging inside.", dugOutPositions.size());
+			if constexpr (IsDebug())
+			{
+				LogFormat("Dug out {}. Starting digging inside.", dugOutPositions.size());
+			}
 
 			auto tryDig = [&](const Vec2I& pos, Vector<Vec2I>& log) {
 				if (std::ranges::binary_search(dugOutPositions, pos) == false)
 				{
 					log.push_back(pos);
-					dugOutPositions.insert(std::ranges::upper_bound(dugOutPositions, pos ), pos);
+					dugOutPositions.insert(std::ranges::upper_bound(dugOutPositions, pos), pos);
 				}
 			};
 
@@ -133,7 +140,10 @@ export namespace aoc
 				}
 			}
 
-			LogFormat("Dug out {}. Starting flood digging.", dugOutPositions.size());
+			if constexpr (IsDebug())
+			{
+				LogFormat("Dug out {}. Starting flood digging.", dugOutPositions.size());
+			}
 
 			// flood fill/dig from all InsideLoop until Loop or InsideLoop
 
@@ -142,35 +152,39 @@ export namespace aoc
 			Vec2I pos;
 			while (floodFillCurrentHeads.empty() == false)
 			{
+				if constexpr (IsDebug())
+				{
 				//LogFormat("Flood dig heads: {} Dug out: {}", floodFillCurrentHeads.size(), dugOutPositions.size());
+				}
+
 				for (const Vec2I& currentHead : floodFillCurrentHeads)
 				{
 					pos = currentHead + DirToVec2(Direction::Left);
 					if (std::ranges::binary_search(dugOutPositions, pos) == false)
 					{
 						floodFillNextHeads.push_back(pos);
-						dugOutPositions.insert(std::ranges::upper_bound(dugOutPositions, pos ), pos);
+						dugOutPositions.insert(std::ranges::upper_bound(dugOutPositions, pos), pos);
 					}
 
 					pos = currentHead + DirToVec2(Direction::Up);
 					if (std::ranges::binary_search(dugOutPositions, pos) == false)
 					{
 						floodFillNextHeads.push_back(pos);
-						dugOutPositions.insert(std::ranges::upper_bound(dugOutPositions, pos ), pos);
+						dugOutPositions.insert(std::ranges::upper_bound(dugOutPositions, pos), pos);
 					}
 
 					pos = currentHead + DirToVec2(Direction::Right);
 					if (std::ranges::binary_search(dugOutPositions, pos) == false)
 					{
 						floodFillNextHeads.push_back(pos);
-						dugOutPositions.insert(std::ranges::upper_bound(dugOutPositions, pos ), pos);
+						dugOutPositions.insert(std::ranges::upper_bound(dugOutPositions, pos), pos);
 					}
 
 					pos = currentHead + DirToVec2(Direction::Down);
 					if (std::ranges::binary_search(dugOutPositions, pos) == false)
 					{
 						floodFillNextHeads.push_back(pos);
-						dugOutPositions.insert(std::ranges::upper_bound(dugOutPositions, pos ), pos);
+						dugOutPositions.insert(std::ranges::upper_bound(dugOutPositions, pos), pos);
 					}
 				}
 
@@ -179,135 +193,6 @@ export namespace aoc
 			}
 
 			return dugOutPositions.size();
-		}
-
-		void WriteDiggingToFile()
-		{
-			// https://stackoverflow.com/questions/2654480/writing-bmp-image-in-pure-c-c-without-other-libraries
-
-			constexpr bool debugBMP = false;
-			constexpr bool debugContent = false;
-
-			Log("Writing digging to file output_day18.bmp");
-			Log("Flood fill and count pixels in pixel-based image editor");
-
-			Vec2I topLeft;
-			Vec2I bottomRight;
-
-			Vector<Vec2I> dugOutPositions;
-			for (const Ground::GroundVolume& volume : DugOutVolumes)
-			{
-				const Vec2I& pos = volume.first;
-
-				topLeft.X = std::min(topLeft.X, pos.X);
-				topLeft.Y = std::min(topLeft.Y, pos.Y);
-
-				bottomRight.X = std::max(bottomRight.X, pos.X);
-				bottomRight.Y = std::max(bottomRight.Y, pos.Y);
-
-				dugOutPositions.push_back(pos);
-			}
-			std::ranges::sort(dugOutPositions);
-
-			const s64 w = bottomRight.X - topLeft.X + 8;
-			const s64 h = bottomRight.Y - topLeft.Y + 8;
-			const Vec2I offset = Vec2I(4, 4) - topLeft;
-
-			FILE* f;
-			unsigned char* img = nullptr;
-			const s64 rowSize = (w + 31) / 32 * 4; // Row size padded to 4-byte boundary
-			s64 filesize = 54 + 8 + rowSize * h;  // Add 8 bytes for the color table
-
-			if constexpr (debugBMP)
-			{
-				LogFormat("Image dimensions (w x h): {} x {}", std::to_string(w), std::to_string(h));
-				LogFormat("Row size (bytes): {}", std::to_string(rowSize));
-				LogFormat("File size (bytes): {}", std::to_string(filesize));
-			}
-
-			img = (unsigned char*)std::malloc(rowSize * h);
-			std::memset(img, 0, rowSize * h);
-
-			for (const Vec2I& pos : dugOutPositions)
-			{
-				Vec2I imgPos = pos + offset;
-				imgPos.Y = (h - 1) - imgPos.Y;
-
-				if (imgPos.X < 0 || imgPos.X >= w || imgPos.Y < 0 || imgPos.Y >= h)
-				{
-					LogFormat("Position out of bounds: {},{}", imgPos.X, imgPos.Y);
-					continue;
-				}
-
-				s32 bitIndex = static_cast<s32>(imgPos.X % 8); // Bit position within the byte
-				s32 byteIndex = static_cast<s32>(imgPos.X / 8); // Byte position within the row
-				img[byteIndex + imgPos.Y * rowSize] |= (1 << (7 - bitIndex));
-			}
-
-
-			unsigned char bmpfileheader[14] = { 'B','M', 0,0,0,0, 0,0, 0,0, 54,0,0,0 };
-			unsigned char bmpinfoheader[40] = { 40,0,0,0, 0,0,0,0, 0,0,0,0, 1,0, 24,0 };
-
-			bmpfileheader[2] = (unsigned char)(filesize);
-			bmpfileheader[3] = (unsigned char)(filesize >> 8);
-			bmpfileheader[4] = (unsigned char)(filesize >> 16);
-			bmpfileheader[5] = (unsigned char)(filesize >> 24);
-
-			bmpinfoheader[4] = static_cast<unsigned char>(w);
-			bmpinfoheader[5] = (unsigned char)(w >> 8);
-			bmpinfoheader[6] = (unsigned char)(w >> 16);
-			bmpinfoheader[7] = (unsigned char)(w >> 24);
-			bmpinfoheader[8] = static_cast<unsigned char>(h);
-			bmpinfoheader[9] = (unsigned char)(h >> 8);
-			bmpinfoheader[10] = (unsigned char)(h >> 16);
-			bmpinfoheader[11] = (unsigned char)(h >> 24);
-			bmpinfoheader[14] = 1; // 1 bit monochrome
-
-			if constexpr (debugBMP)
-			{
-				LogFormat("BMP File Header: ");
-				LogFormat("File type: {}{}", (char)bmpfileheader[0], (char)bmpfileheader[1]); // Should be 'B', 'M'
-				LogFormat("File size: {}", *((u32*)&bmpfileheader[2]));     // File size in bytes
-				LogFormat("Data offset: {}", *((u32*)&bmpfileheader[10]));  // Should be 54 + color table size
-
-				LogFormat("BMP Info Header: ");
-				LogFormat("Header size: {}", *((u32*)&bmpinfoheader[0]));   // Should be 40
-				LogFormat("Image width: {}", *((s32*)&bmpinfoheader[4]));    // Image width
-				LogFormat("Image height: {}", *((s32*)&bmpinfoheader[8]));   // Image height
-				LogFormat("Planes: {}", *((u16*)&bmpinfoheader[12]));       // Should be 1
-				LogFormat("Bit count: {}", *((u16*)&bmpinfoheader[14]));    // Should be 1 for monochrome
-				LogFormat("Image size: {}", *((u32*)&bmpinfoheader[20]));   // Can be 0 for BI_RGB bitmaps
-			}
-
-			errno_t returnValue = fopen_s(&f, "output_day18.bmp", "wb");
-			Assert(returnValue == 0);
-			fwrite(bmpfileheader, 1, 14, f);
-			fwrite(bmpinfoheader, 1, 40, f);
-
-			unsigned char colorTable[8] = { 0,0,0,0, 255,255,255,0 }; // Black and White
-			fwrite(colorTable, 1, 8, f);
-
-			if constexpr (debugContent)
-			{
-				for (int i = 0; i < h; i++)
-				{
-					unsigned char* row = img + (rowSize * (h - i - 1));
-					std::string rowContent;
-					for (int j = 0; j < rowSize; j++)
-					{
-						rowContent += std::bitset<8>(row[j]).to_string() + " ";
-					}
-					LogFormat("Row {} content: {}", h - i, rowContent);
-				}
-			}
-
-			for (int i = 0; i < h; i++)
-			{
-				fwrite(img + (rowSize * (h - i - 1)), 1, rowSize, f);
-			}
-
-			std::free(img);
-			fclose(f);
 		}
 	};
 
@@ -359,12 +244,19 @@ export namespace aoc
 		Vec2I diggerPos;
 		Vector<Vec2I> dugVertices;
 		dugVertices.push_back(diggerPos);
-		LogFormat("Starting digging at {},{}", diggerPos.X, diggerPos.Y);
+
+		if constexpr (IsDebug())
+		{
+			LogFormat("Starting digging at {},{}", diggerPos.X, diggerPos.Y);
+		}
 
 		String line;
 		while (std::getline(input, line))
 		{
-			Log(line);
+			if constexpr (IsDebug())
+			{
+				Log(line);
+			}
 
 			Vector<String> digInstructionStrs = Split(line, " ");
 			Assert(digInstructionStrs.size() == 3);
@@ -390,16 +282,14 @@ export namespace aoc
 			const u64 digMeters = std::stoi(digColor, 0, 16);
 			Assert(digMeters > 0);
 
-			//ground.Dig(digDir, digMeters);
-
 			diggerPos += DirToVec2(digDir) * digMeters;
-			LogFormat("Digging {} meters to {},{}", digMeters, diggerPos.X, diggerPos.Y);
 			dugVertices.push_back(diggerPos);
+
+			if constexpr (IsDebug())
+			{
+				LogFormat("Digging {} meters to {},{}", digMeters, diggerPos.X, diggerPos.Y);
+			}
 		}
-
-		// outsource inside digging to image-based flood fill algorithms
-		//ground.WriteDiggingToFile(); // scratch that, area of example is too big already
-
 
 		Vec2I topLeft;
 		Vec2I bottomRight;
@@ -415,28 +305,14 @@ export namespace aoc
 		const Vec2I offset = -topLeft;
 
 
-		constexpr bool outputSVG = true;
-		const u32 strokeWidth = static_cast<u32>(Length(bottomRight - topLeft)) / 200;
-		std::ofstream visualizeAreaFile;
-		visualizeAreaFile.open("output_day18.htm");
-		Assert(visualizeAreaFile);
+		constexpr bool outputSVG = IsDebug() || false;
+		const s32 strokeWidth = static_cast<u32>(Length(bottomRight - topLeft)) / 500;
 
+		std::ofstream visualizeAreaFile;
 		if constexpr (outputSVG)
 		{
-			Log("");
-			String out = R"(<!DOCTYPE html><html><head><style>)"
-						 R"(body, html)"
-						 R"({margin: 0; padding: 0; height: 100%; width: 100%; display: flex; justify-content: center; align-items: center;} )"
-						 R"(svg)"
-						 R"({display: block; max-width: 100%; max-height: 100vh; height: auto; width: auto;})"
-						 R"(</style></head><body>)";
-			out.append("\n");
-			out.append(R"(<svg viewBox=")");
-			out.append(StringFormat("0 0 {} {}", bottomRight.X - topLeft.X, bottomRight.Y - topLeft.Y));
-			out.append(R"(" preserveAspectratio="xMidYMid meet">)"
-					   R"(<polygon points = ")");
-			Log(out);
-			visualizeAreaFile << out;
+			visualizeAreaFile.open("output_day18.htm");
+			Assert(visualizeAreaFile);
 		}
 
 		String svgPositions;
@@ -444,8 +320,6 @@ export namespace aoc
 		f64 dugOutAreaSum = 0.;
 		Assert(dugVertices.back() == dugVertices.front());
 		dugVertices.pop_back();
-
-		Log("");
 
 		// insides are right, but positive kartesian quadrant is oriented y up, thus we are going counter-clockwise by default here
 
@@ -458,21 +332,18 @@ export namespace aoc
 			const Vec2I lastPos = *lastVertex + offset;
 			const u64 delta = Length(currentPos - lastPos);
 			circumference += delta;
-			LogFormat("{}, {} -> {}, {} (length {})", lastPos.X, lastPos.Y, currentPos.X, currentPos.Y, delta);
 
-			// https://en.wikipedia.org/wiki/Shoelace_formula , add 0.5,0.5 to each coordinate to use the center of the hole cubes
+			if constexpr (IsDebug())
+			{
+				LogFormat("{}, {} -> {}, {} (length {})", lastPos.X, lastPos.Y, currentPos.X, currentPos.Y, delta);
+			}
+
+			// https://en.wikipedia.org/wiki/Shoelace_formula
+			// add 0.5,0.5 to each coordinate to use the center of the hole cubes
 			dugOutAreaSum +=
-				(
-					(lastPos.X + 0.5)
-					*
-					(currentPos.Y + 0.5)
-				)
+				((lastPos.X + 0.5) * (currentPos.Y + 0.5))
 				-
-				(
-					(currentPos.X + 0.5)
-					*
-					(lastPos.Y + 0.5)
-				);
+				((currentPos.X + 0.5) * (lastPos.Y + 0.5));
 
 			lastVertex = &currentVertex;
 
@@ -482,25 +353,28 @@ export namespace aoc
 			}
 		}
 
-		Log("");
-
 		if constexpr (outputSVG)
 		{
-			Log(svgPositions);
-			visualizeAreaFile << svgPositions;
+			String out = R"(<!DOCTYPE html><html><head><style>>body, html{margin: 0; padding: 0; height: 100%; width: 100%; display: flex; justify-content: center; align-items: center;} svg{display: block; max-width: 100%; max-height: 100vh; height: auto; width: auto;}</style></head>
+							)";
+			out.append(StringFormat(R"(<body><svg viewBox="{} {} {} {}" preserveAspectratio = "xMidYMid meet">
+									)", -strokeWidth, -strokeWidth, bottomRight.X - topLeft.X + strokeWidth * 2, bottomRight.Y - topLeft.Y + strokeWidth * 2));
+			out.append(StringFormat(R"("<polygon points =
+									{}
+									style="fill:grey;stroke:black;stroke-width:{}" /></svg></body></html>
+									)", svgPositions, strokeWidth));
 
-			String out = R"(" style="fill:none;stroke:black;stroke-width:)";
-			out.append(StringFormat(R"({}" /></svg>)", strokeWidth));
-			out.append("\n</body></html>\n");
+			Log("");
 			Log(out);
 			visualizeAreaFile << out;
+			visualizeAreaFile.close();
 		}
-		visualizeAreaFile.close();
 
-		f64 result = std::abs(dugOutAreaSum / 2.);
+		f64 verticesArea = std::abs(dugOutAreaSum / 2.);
+
 		// add half of each hole cube (which was outside the polygon), and add 1 for all outside quarters that were not included
-		const s64 integerResult = static_cast<s64>(result) + 1 + (circumference / 2);
+		f64 result = verticesArea + 1 + (circumference / 2);
 
-		return std::to_string(integerResult);
+		return std::to_string(static_cast<s64>(result));
 	}
 }

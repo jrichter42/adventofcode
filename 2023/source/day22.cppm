@@ -12,6 +12,7 @@ export namespace aoc
 		while (std::getline(input, line))
 		{
 
+
 		}
 
 		u32 result = 0;
